@@ -1,0 +1,57 @@
+QDialog,QWidget
+{
+	/*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #2198c0, stop: 1 #0d5ca6);*/
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #2198c0, stop: 1 #0d5ca6);
+	border: 2px groove #999;
+	color: black;
+	border-radius: 4px;
+}
+QLabel
+{
+	background-color: transparent;
+	color: black;
+	border-width: 0px;
+}
+
+QSlider
+{
+	selection-background-color: #0d5ca6;
+	border-width:0px; 
+	color: black;
+}
+
+QDialog#messageDialog
+{
+	font-size: 1em;
+	border: 1px solid #b2c4d6;
+	background-color: white;
+	padding: 1px;
+	border-style: solid; 
+	border-width: 1px; 
+	border-radius: 2px; 
+	border-color: #cdcdcd;	
+	color: black;
+	border: 1px solid #b2c4d6;
+	selection-background-color: #0d5ca6;
+	selection-color: white;
+	background: #f6f6f6;
+	background-color: #f6f6f6;
+	min-height: 1.5em;
+	font: 1em;
+	margin: 0 1px 0 1px;
+	color: white;
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #2198c0, stop: 1 #0d5ca6);
+	border-style: outset;
+	border-width: 1px;
+	border-radius: 3px;
+	border-color: #0c457e;
+}
+
+QPushButton:pressed
+{
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #0d5ca6, stop: 1 #2198c0);
+	font: 0.8em;
+	color: black;
+	background-color: #f2f1f1;
+	border: 0;
+}

@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/">
+		<file>res/doc_search.png</file>
+		<file>res/exit.png</file>
+		<file>res/icon-search.png</file>
+		<file>res/ic_btn_search.png</file>
+		<file>res/indexedDB.png</file>
+		<file>res/keyword_search_magnifier.png</file>
+		<file>res/omnibox_search_secured.png</file>
+		<file>res/save.png</file>
+		<file>res/search.png</file>
+		<file>res/searchfind.png</file>
+		<file>res/search_magnifier.png</file>
+		<file>res/search_magnifier_results.png</file>
+		<file>res/settings.png</file>
+		<file>res/bun.png</file>
+		<file>res/hit.png</file>
+		<file>res/css.css</file>
+    </qresource>
+</RCC>
