@@ -25,10 +25,6 @@ SOURCES += main.cpp\
     emitter.cpp \
     logger.cpp \
     logwnd.cpp \
-    jvm.cpp \
-    indexer.cpp \
-    indexerthread.cpp \
-    indexerworker.cpp \
     zlib/adler32.c \
     zlib/compress.c \
     zlib/crc32.c \
@@ -180,12 +176,16 @@ SOURCES += main.cpp\
     clucene/CLucene/SharedHeader.cpp \
     clucene/CLucene/StdHeader.cpp \
     clucene/CLucene/config/threads.cpp \
-    lucy.cpp \
     str.cpp \
-    lucysearcher.cpp \
-    lucyindexer.cpp \
-    searcher.cpp \
-    wsearchresultmodel.cpp
+    wsearchresultmodel.cpp \
+    indexer/indexer.cpp \
+    indexer/indexerthread.cpp \
+    indexer/indexerworker.cpp \
+    indexer/jvm.cpp \
+    lucy/lucy.cpp \
+    lucy/lucyindexer.cpp \
+    lucy/lucysearcher.cpp \
+    searcher/searcher.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -196,10 +196,6 @@ HEADERS  += mainwindow.h \
     emitter.h \
     logger.h \
     logwnd.h \
-    jvm.h \
-    indexer.h \
-    indexerthread.h \
-    indexerworker.h \
     zlib/crc32.h \
     zlib/deflate.h \
     zlib/inffast.h \
@@ -561,12 +557,16 @@ HEADERS  += mainwindow.h \
     clucene/CLucene/SharedHeader.h \
     clucene/CLucene/StdHeader.h \
     clucene/CLucene.h \
-    lucy.h \
     str.h \
-    lucysearcher.h \
-    lucyindexer.h \
-    searcher.h \
-    wsearchresultmodel.h
+    wsearchresultmodel.h \
+    indexer/indexer.h \
+    indexer/indexerthread.h \
+    indexer/indexerworker.h \
+    indexer/jvm.h \
+    lucy/lucy.h \
+    lucy/lucyindexer.h \
+    lucy/lucysearcher.h \
+    searcher/searcher.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \
@@ -581,8 +581,11 @@ DISTFILES += ico.ico \
 
 RC_FILE = res.rc
 
+INCLUDEPATH += ./lucy
+INCLUDEPATH += ./indexer
+INCLUDEPATH += ./searcher
+
 INCLUDEPATH += ./java/include/win32
 INCLUDEPATH += ./clucene
 INCLUDEPATH += ./zlib
 INCLUDEPATH += ./boost
-
