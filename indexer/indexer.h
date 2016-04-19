@@ -11,20 +11,25 @@ class indexer : public QObject
 {
     Q_OBJECT
 public:
-    explicit indexer(logger* pLogger, jvm* pJvm, lucyindexer* pLucyIndexer, QObject *parent = 0);
+    explicit indexer(logger* pLogger, jvm* pJvm/*, lucyindexer* pLucyIndexer*/, QObject *parent = 0);
+    ~indexer();
+    QMap<QString, indexerThread*>* getIndexers();
     void add(QString sDir2Index);
     bool isIndexing(QString sDir2Index);
+    void stopAll();
+    bool isStoppedAll();
 
 protected:
     QMap<QString, indexerThread*> m_pWorkers;
     logger* m_pLogger;
-    lucyindexer* m_pLucyIndexer;
+    //lucyindexer* m_pLucyIndexer;
     jvm* m_pJvm;
 
 signals:
 
 public slots:
     void onThreadFinished();
+    void onQuit();
 
 };
 

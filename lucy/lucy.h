@@ -2,8 +2,17 @@
 #define LUCY_H
 
 #include <QObject>
+#include "globalinclude.h"
 #include "CLucene.h"
 #include "CLucene/index/IndexModifier.h"
+#include "CLucene/config/repl_wchar.h"
+#include "CLucene/config/repl_tchar.h"
+#include "CLucene/highlighter/Highlighter.h"
+#include "CLucene/highlighter/QueryScorer.h"
+#include "CLucene/highlighter/Highlighter.h"
+#include "CLucene/highlighter/TokenGroup.h"
+#include "CLucene/highlighter/SimpleHTMLFormatter.h"
+#include "CLucene/highlighter/SimpleFragmenter.h"
 #include "logger.h"
 #include "cfg.h"
 #include "str.h"
@@ -16,9 +25,9 @@ using namespace lucene::store;
 using namespace lucene::index;
 using namespace lucene::search;
 using namespace lucene::document;
-
-#define ID_FN _T("id_fn")
-#define ID_FNANDDATE _T("id_fnanddate")
+using namespace lucene::queryParser;
+using namespace lucene::util;
+CL_NS_USE2(search, highlight);
 
 class lucy : public QObject
 {
@@ -26,12 +35,18 @@ class lucy : public QObject
 public:
     explicit lucy(logger* pLogger, QObject *parent = 0);
     ~lucy();
-    void open();
+    virtual void open(QString sDir2Index);
+    virtual void close();
+    lucene::analysis::Analyzer* getAnalyzer();
+    Directory* getDirectory();
+    void setDirectory(Directory* pDirectory);
 
 protected:
     logger* m_pLogger;
     lucene::analysis::Analyzer* m_pAnalyzer;
     Directory* m_pDirectory;
+    QString m_sDir2Index;
+    QString m_sDirIndex;
 
 signals:
 

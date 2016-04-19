@@ -13,12 +13,16 @@ class indexerWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit indexerWorker(QString sDir2Index, logger* pLogger, jvm* pJvm, lucyindexer* pLucyIndexer, QObject *parent = 0);
+    explicit indexerWorker(QString sDir2Index, logger* pLogger, jvm* pJvm, /*lucyindexer* pLucyIndexer, */QObject *parent = 0);
+    ~indexerWorker();
+    void close();
     int getNrOfIndexedFiles();
     int getNrOfFilesInIndex();
     int getNrOfFoundFiles();
     QString getIndexedDir();
     int getIndexTime();
+    bool openIndex();
+    lucyindexer* getIndexer();
 
 protected:
     QString m_sDir2Index;

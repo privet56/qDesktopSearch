@@ -15,6 +15,10 @@ jvm::jvm(logger* pLogger, QObject *parent) : QObject(parent), m_pLogger(pLogger)
 
 bool jvm::load()
 {
+#ifdef _DEBUG
+    return true;
+#endif
+
     JavaVMInitArgs vm_args;
     JavaVMOption options[OPTIONSLEN];
 
@@ -240,6 +244,10 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
      }*/
 
     sAbsPathName = str::normalizePath(sAbsPathName, false);
+
+#ifdef _DEBUG
+    return;
+#endif
 
 //get objects
     jobject oFile               = getObject("java.io.File", sAbsPathName);

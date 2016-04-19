@@ -3,6 +3,8 @@
 
 #include <QAbstractTableModel>
 #include "searcher.h"
+#include "logger.h"
+#include "indexer.h"
 
 class wsearchresultModel : public QAbstractTableModel
 {
@@ -10,6 +12,9 @@ class wsearchresultModel : public QAbstractTableModel
 public:
     explicit wsearchresultModel(searcher* pSearcher, QObject *parent = 0);
     ~wsearchresultModel();
+
+    void setEnv(logger* pLog, indexer* pIndexer);
+    int search(QList<QPair<QString, QString>> lpSearchinputs);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -20,6 +25,10 @@ public:
 
 protected:
     searcher* m_pSearcher;
+
+protected:
+    logger* m_pLog;
+    indexer* m_pIndexer;
 
 signals:
 

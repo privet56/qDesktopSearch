@@ -25,16 +25,19 @@ CL_NS(document)::Document* Searchable::doc(const int32_t i){
 }
 
 //static
-Query* Query::mergeBooleanQueries(CL_NS(util)::ArrayBase<Query*>* queries) {
+Query* Query::mergeBooleanQueries(CL_NS(util)::ArrayBase<Query*>* queries)
+{
   std::vector<BooleanClause*> allClauses;
 
   CL_NS(util)::ValueArray<BooleanClause*> clauses;
-  for (size_t i = 0; i < queries->length; i++) {
+  for (size_t i = 0; i < queries->length; i++)
+  {
     assert(BooleanQuery::getClassName() == queries->values[i]->getObjectName());
     BooleanQuery* booleanQuery = (BooleanQuery*)queries->values[i];
-	  clauses.resize((booleanQuery->getClauseCount()));
+    clauses.resize((booleanQuery->getClauseCount()));
     booleanQuery->getClauses(clauses.values);
-    for (size_t j = 0; j < clauses.length; j++) {
+    for (size_t j = 0; j < clauses.length; j++)
+    {
       allClauses.push_back(clauses.values[j]->clone());
     }
   }
@@ -42,7 +45,8 @@ Query* Query::mergeBooleanQueries(CL_NS(util)::ArrayBase<Query*>* queries) {
   bool coordDisabled = ( queries->length == 0 ) ? false : ((BooleanQuery*)queries->values[0])->isCoordDisabled();
   BooleanQuery* result = _CLNEW BooleanQuery(coordDisabled);
   std::vector<BooleanClause*>::iterator i = allClauses.begin();
-  while ( i != allClauses.end() ){
+  while ( i != allClauses.end() )
+  {
     result->add(*i);
 	i++;
   }

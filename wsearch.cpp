@@ -1,12 +1,17 @@
 #include "wsearch.h"
 #include "str.h"
+#include "lucy.h"
 #include "searcher.h"
 #include "ui_wsearch.h"
 #include "wsearchresultmodel.h"
+#include <QPair>
+#include <QList>
 
 wSearch::wSearch(QWidget *parent) :
     QFrame(parent),
-    ui(new Ui::wSearch)
+    ui(new Ui::wSearch),
+    m_pIndexer(nullptr),
+    m_pLog(nullptr)
 {
     ui->setupUi(this);
 
@@ -30,7 +35,21 @@ void wSearch::on_eSearchTerm_textChanged(const QString &arg1)
 
 void wSearch::on_commandLinkButtonSearch_clicked()
 {
+    QPair<QString, QString> pair;
+    pair.first  = this->ui->eSearchTerm->text();
+    pair.second = QString::fromStdWString(FIELDNAME_FULLTEXT);
+    QList<QPair<QString, QString>> lpSearchInputs;
+    lpSearchInputs.append(pair);
 
+    wsearchresultModel* pModel = (wsearchresultModel*)this->ui->tableView->model();
+    int hits = (pModel)->search(lpSearchInputs);
+    wsearchresultModel* pModel2 = new wsearchresultModel(nullptr, nullptr);
+    //TODO: do it better (emit dataChanged?)
+    this->ui->tableView->setModel(pModel2);
+    this->ui->tableView->setModel(pModel);
+    delete pModel2;
+    pModel2 = nullptr;
+    this->ui->lHitCount->setText(QString::number(hits)+" hits found");
 }
 
 void wSearch::on_tableView_clicked(const QModelIndex &index)
@@ -46,4 +65,11 @@ void wSearch::on_tableView_doubleClicked(const QModelIndex &index)
 void wSearch::on_tableView_customContextMenuRequested(const QPoint &pos)
 {
 
+}
+
+void wSearch::setEnv(logger* pLog, indexer* pIndexer)
+{
+    this->m_pLog        = pLog;
+    this->m_pIndexer    = pIndexer;
+    ((wsearchresultModel*)this->ui->tableView->model())->setEnv(pLog, pIndexer);
 }

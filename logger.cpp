@@ -21,6 +21,8 @@ logger::logger(cfg* pCfg, LogWnd* pTeLog, QObject *parent) : QObject(parent), m_
 
 void logger::log(QString s, logger::LogLevel level)
 {
+    qDebug() << this->level2str(level) << " " << s;;
+
     bool isGuiThread = QThread::currentThread() == QCoreApplication::instance()->thread();
     if (!isGuiThread)
     {
@@ -73,6 +75,10 @@ void logger::log(QString s, logger::LogLevel level)
     __bLastLineWasIsSameLine = bIsSameLine;
 }
 
+void logger::dbg(QString s)
+{
+    this->log(s, LogLevel::DBG);
+}
 void logger::inf(QString s)
 {
     this->log(s, LogLevel::INF);
@@ -90,6 +96,8 @@ bool logger::err(QString s)
 
 QString logger::level2color(LogLevel level)
 {
+    if(level == LogLevel::DBG)
+        return "blue";
     if(level == LogLevel::INF)
         return "green";
     if(level == LogLevel::WRN)
@@ -101,6 +109,8 @@ QString logger::level2color(LogLevel level)
 }
 QString logger::level2str(LogLevel level)
 {
+    if(level == LogLevel::DBG)
+        return "DBG";
     if(level == LogLevel::INF)
         return "INF";
     if(level == LogLevel::WRN)

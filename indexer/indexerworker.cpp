@@ -1,16 +1,21 @@
 #include "indexerworker.h"
+#include "indexerthread.h"
 #include "str.h"
 #include <QTime>
+#include <QThread>
 #include <QDebug>
 #include <QDirIterator>
 
-indexerWorker::indexerWorker(QString sDir2Index, logger* pLogger, jvm* pJvm, lucyindexer* pLucyIndexer, QObject *parent) : QObject(parent), m_pLogger(pLogger), m_pJvm(pJvm), m_sDir2Index(sDir2Index), m_pLucyIndexer(pLucyIndexer), m_iIndexedFiles(0), m_iIndexingTime(0), m_iFoundFiles(0)
+indexerWorker::indexerWorker(QString sDir2Index, logger* pLogger, jvm* pJvm/*, lucyindexer* pLucyIndexer*/, QObject *parent) : QObject(parent),
+    m_pLogger(pLogger), m_pJvm(pJvm), m_sDir2Index(sDir2Index), m_iIndexedFiles(0), m_iIndexingTime(0), m_iFoundFiles(0), m_pLucyIndexer(nullptr)
 {
 
 }
 
 void indexerWorker::doWork()
 {
+    openIndex();
+
     m_iIndexingTime = 0;
     m_iFoundFiles   = 0;
     m_iIndexedFiles = 0;
@@ -21,6 +26,8 @@ void indexerWorker::doWork()
     connect(this,SIGNAL(getMetaContents(QString,QMap<QString, QStringList>*)),this->m_pJvm,SLOT(getMetaContents(QString,QMap<QString, QStringList>*)), Qt::BlockingQueuedConnection);
 
     dir(m_sDir2Index);
+
+    if(this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished();
 
     /*{
         int iFiles = this->m_fileWorkers.count();
@@ -41,6 +48,14 @@ void indexerWorker::dir(QString sDir)
     QDirIterator it(sDir, QStringList() << "*", QDir::Files | QDir::Dirs | QDir::NoDotDot | QDir::NoDot | QDir::NoSymLinks, QDirIterator::Subdirectories);
     while (it.hasNext())
     {
+        if(QThread::currentThread()->isInterruptionRequested())
+        {
+            m_pLogger->inf("an indexer thread terminated. found#:"+QString::number(getNrOfFoundFiles())+" indexed#:"+QString::number(getNrOfIndexedFiles())+" time:"+logger::t_elapsed(getIndexTime())+"  dir:"+getIndexedDir());
+            close();
+            QThread::currentThread()->terminate();      //here safe to terminate
+            return;
+        }
+
         QString sEntry(it.next());
         sEntry = str::normalizePath(sEntry, false);
         QFileInfo finfo(sEntry);
@@ -49,6 +64,10 @@ void indexerWorker::dir(QString sDir)
             file(sEntry, finfo);
         }
     }
+
+    m_pLogger->inf("an indexer thread finished. found#:"+QString::number(getNrOfFoundFiles())+" indexed#:"+QString::number(getNrOfIndexedFiles())+" time:"+logger::t_elapsed(getIndexTime())+"  dir:"+getIndexedDir());
+
+    close();
 }
 
 void indexerWorker::file(QString sAbsPathName, QFileInfo finfo)
@@ -65,7 +84,17 @@ void indexerWorker::file(QString sAbsPathName, QFileInfo finfo)
         }
     }
 
+    if(QThread::currentThread()->isInterruptionRequested())
+    {
+        return;
+    }
+
     if(this->m_pLucyIndexer->isIndexed(sAbsPathName, finfo))
+    {
+        return;
+    }
+
+    if(QThread::currentThread()->isInterruptionRequested())
     {
         return;
     }
@@ -76,6 +105,11 @@ void indexerWorker::file(QString sAbsPathName, QFileInfo finfo)
     //this->m_pJvm->getMetaContents(sAbsPathName, &metaContents);
     emit getMetaContents(sAbsPathName, pMetaContents);          //needs connect(...Qt::BlockingQueuedConnection);
     enrichMetaContents(sAbsPathName, pMetaContents, finfo);
+
+    if(QThread::currentThread()->isInterruptionRequested())
+    {
+        return;
+    }
 
 /*debug code begin
     {
@@ -101,6 +135,11 @@ void indexerWorker::file(QString sAbsPathName, QFileInfo finfo)
     pMetaContents = nullptr;
 
     m_iIndexedFiles++;
+
+    if(QThread::currentThread()->isInterruptionRequested())
+    {
+        return;
+    }
 }
 
 void indexerWorker::enrichMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMetas, QFileInfo finfo)
@@ -113,7 +152,7 @@ void indexerWorker::enrichMetaContents(QString sAbsPathName, QMap<QString, QStri
     }
     {
         QString sFN(finfo.fileName());  //with ext
-        this->addMetaContents(pMetas, "filename", sFN);
+        this->addMetaContents(pMetas, QString::fromStdWString(FIELDNAME_FILENAME), sFN);
     }
     {
         QString sExt(finfo.suffix());   //or completeSuffix
@@ -149,11 +188,12 @@ void indexerWorker::addMetaContents(QMap<QString, QStringList>* pMetas, QString 
 int indexerWorker::getNrOfIndexedFiles()
 {
     return this->m_iIndexedFiles;
-    return this->m_pLucyIndexer->getNrOfIndexedFiles();
 }
 int indexerWorker::getNrOfFilesInIndex()
 {
-    return this->m_pLucyIndexer->getNrOfFilesInIndex();
+    if(this->m_pLucyIndexer)
+        return this->m_pLucyIndexer->getNrOfFilesInIndex();
+    return 0;
 }
 int indexerWorker::getNrOfFoundFiles()
 {
@@ -168,4 +208,31 @@ int indexerWorker::getIndexTime()
 QString indexerWorker::getIndexedDir()
 {
     return this->m_sDir2Index;
+}
+
+bool indexerWorker::openIndex()
+{
+    if(!m_pLucyIndexer)
+    {
+        m_pLucyIndexer = new lucyindexer(this->m_pLogger, this);
+        m_pLucyIndexer->open(this->m_sDir2Index);
+    }
+    return true;
+}
+void indexerWorker::close()
+{
+    if(m_pLucyIndexer)
+    {
+        delete m_pLucyIndexer;
+    }
+    m_pLucyIndexer = nullptr;
+}
+
+indexerWorker::~indexerWorker()
+{
+    close();
+}
+lucyindexer* indexerWorker::getIndexer()
+{
+    return this->m_pLucyIndexer;
 }

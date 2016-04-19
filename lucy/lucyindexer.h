@@ -16,7 +16,8 @@ class lucyindexer : public lucy
 public:
     lucyindexer(logger* pLogger, QObject *parent = 0);
     ~lucyindexer();
-    void open();
+    void open(QString sDir2Index);
+    virtual void close();
     int getNrOfIndexedFiles();
     int getNrOfFilesInIndex();
     bool isIndexed(QString sAbsPathName, QFileInfo finfo);
@@ -28,6 +29,7 @@ protected:
     //IndexWriter* m_pIndexWriter;
     IndexModifier* m_pIndexWriter;
     int m_iIndexedFiles;
+    bool m_bNewIndex;
 
 };
 

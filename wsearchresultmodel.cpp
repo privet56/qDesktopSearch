@@ -7,7 +7,9 @@
  * Creates a model object with the given \a ds and \a parent.
  */
 wsearchresultModel::wsearchresultModel(searcher* pSearcher, QObject *parent)
-    :QAbstractTableModel(parent), m_pSearcher(pSearcher)
+    :QAbstractTableModel(parent), m_pSearcher(pSearcher),
+      m_pIndexer(nullptr),
+      m_pLog(nullptr)
 {
 
 }
@@ -22,12 +24,13 @@ wsearchresultModel::~wsearchresultModel()
 
 int wsearchresultModel::rowCount(const QModelIndex &/*parent*/) const
 {
-    return m_pSearcher->getHitCount();
+    int iHitCount = m_pSearcher == nullptr ? 0 :  m_pSearcher->getHitCount();
+    return iHitCount;
 }
 
 int wsearchresultModel::columnCount(const QModelIndex &/*parent*/) const
 {
-//1:fn(tooltip: fullpath), 2:hitEnvironment
+    //1:fn(tooltip: fullpath(or all infos)), 2:hitEnv
     return 2;
 }
 
@@ -49,7 +52,7 @@ QVariant wsearchresultModel::data(const QModelIndex &index, int role) const
     if((role == Qt::DisplayRole) || (role == Qt::ToolTipRole) || (role == Qt::StatusTipRole))
     {
 		if(column2BeReturned == 0)
-            return m_pSearcher->GetHitAttr(hitIndex2BeReturned, "filename");
+            return m_pSearcher->GetHitAttr(hitIndex2BeReturned, QString::fromStdWString(FIELDNAME_FILENAME));
 		if(column2BeReturned == 1)
             return m_pSearcher->GetHitEnv(hitIndex2BeReturned);
 		//TODO: wrn
@@ -101,9 +104,21 @@ QVariant wsearchresultModel::headerData(int section, Qt::Orientation orientation
     {
 		//TODO: get file icon
         if (orientation == Qt::Vertical)
+        {
             return QIcon(":/res/hit.png");
+        }
     }
-    if (role == Qt::DisplayRole)
+    else if(role == Qt::SizeHintRole)
+    {
+        if (orientation == Qt::Horizontal)
+        {
+            if(section == 0)
+                return QVariant(QSize(20, 20));
+            if(section == 1)//TODO: why is this not working?
+                return QVariant(QSize(500, 20));
+        }
+    }
+    else if (role == Qt::DisplayRole)
     {
         if (orientation == Qt::Horizontal)
         {
@@ -133,4 +148,15 @@ bool wsearchresultModel::setData(const QModelIndex &index, const QVariant &value
     }
 
     return false;
+}
+void wsearchresultModel::setEnv(logger* pLog, indexer* pIndexer)
+{
+    this->m_pLog        = pLog;
+    this->m_pIndexer    = pIndexer;
+    this->m_pSearcher->setEnv(pLog, pIndexer);
+}
+int wsearchresultModel::search(QList<QPair<QString, QString>> lpSearchinputs)
+{
+    int iHits = this->m_pSearcher->search(lpSearchinputs);
+    return iHits;
 }

@@ -2,6 +2,8 @@
 #define WSEARCH_H
 
 #include <QFrame>
+#include "logger.h"
+#include "indexer.h"
 
 namespace Ui {
 class wSearch;
@@ -13,7 +15,12 @@ class wSearch : public QFrame
 
 public:
     explicit wSearch(QWidget *parent = 0);
+    void setEnv(logger* pLog, indexer* pIndexer);
     ~wSearch();
+
+protected:
+    logger* m_pLog;
+    indexer* m_pIndexer;
 
 private slots:
     void on_eSearchTerm_textChanged(const QString &arg1);

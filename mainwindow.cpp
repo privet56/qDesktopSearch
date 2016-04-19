@@ -2,17 +2,14 @@
 #include "ui_mainwindow.h"
 #include <QTimer>
 
-logger* __pLogger = nullptr;
-
 MainWindow::MainWindow(QSplashScreen* pSplash, logger* pLog, indexer* pIndexer, QWidget *parent) :
     QMainWindow(parent),
     m_pLog(pLog),
     m_pIndexer(pIndexer),
     ui(new Ui::MainWindow)
 {
-    __pLogger = this->m_pLog;
-
     ui->setupUi(this);
+    ui->scrollAreaWidgetContents->setEnv(this->m_pLog, this->m_pIndexer);
 
     this->ui->eLog->SetStatusBar(this->statusBar());
     this->m_pLog->SetLogWnd(this->ui->eLog);
@@ -31,11 +28,5 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionExit_triggered()
 {
-    //TODO: end smootly indexer threads
     this->close();
-}
-
-logger* MainWindow::getLogger()
-{
-    return __pLogger;
 }

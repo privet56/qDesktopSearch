@@ -14,7 +14,7 @@ class logger : public QObject
 public:
     //see also on the bottom
     Q_ENUMS(LogLevel)
-    enum LogLevel { INF, WRN, ERR };
+    enum LogLevel { DBG, INF, WRN, ERR };
 
     void SetLogWnd(LogWnd* pTeLog);
     cfg* GetCfg();
@@ -37,6 +37,7 @@ signals:
 
 public slots:
     void log(QString s, logger::LogLevel level);
+    void dbg(QString s);
     void inf(QString s);
     bool wrn(QString s);
     bool err(QString s);

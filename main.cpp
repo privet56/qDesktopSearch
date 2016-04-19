@@ -13,10 +13,14 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    //TODO: singleInstance!
+
 //splash
     QPixmap pixmap(":/res/bun.png");
     QSplashScreen splash(pixmap, Qt::SplashScreen | Qt::WindowStaysOnTopHint);
+#ifndef _DEBUG
     splash.show();
+#endif
     splash.showMessage("Loading...", Qt::AlignBottom, Qt::red);
 
     cfg _cfg(&a);
@@ -24,7 +28,7 @@ int main(int argc, char *argv[])
 
 //css
     {
-        QFile data(":/css.css");
+        QFile data(":/res/css.css");
         QString style;
         if (data.open(QFile::ReadOnly))
         {
@@ -39,17 +43,15 @@ int main(int argc, char *argv[])
     jvm _jvm(&_log);
     _jvm.load();
 
-//lucy
-    lucyindexer _lucyindexer(&_log);
-    _lucyindexer.open();
-
 //indexer
-    indexer _indexer(&_log, &_jvm, &_lucyindexer);
+    indexer _indexer(&_log, &_jvm);
 
 //wnd
     MainWindow w(&splash, &_log, &_indexer);
     w.show();
     //splash.finish(&w);    //let MainWindow handle it
+
+    QObject::connect(qApp, SIGNAL(lastWindowClosed()), &_indexer, SLOT(onQuit()));
 
     return a.exec();
 }

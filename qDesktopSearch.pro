@@ -6,6 +6,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = qDesktopSearch
 TEMPLATE = app
 
+CONFIG(debug, debug|release) {
+    DEFINES += _DEBUG
+    DEFINES += DEBUG
+}
+
+#would be cool if my libs would also be compiled with this flag
 #DEFINES += _ATL_XP_TARGETING
 
 #avoid zlib warnings
@@ -16,6 +22,10 @@ DEFINES += NOMINMAX
 DEFINES += WIN32_LEAN_AND_MEAN
 DEFINES += WIN64_LEAN_AND_MEAN
 DEFINES += MAKE_CLUCENE_SHARED_LIB
+
+#//TODO: activate & config for porterStemmer
+#DEFINES += _MBCS
+#DEFINES += _UNICODE
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -185,7 +195,59 @@ SOURCES += main.cpp\
     lucy/lucy.cpp \
     lucy/lucyindexer.cpp \
     lucy/lucysearcher.cpp \
-    searcher/searcher.cpp
+    searcher/searcher.cpp \
+    clucene-contrib-lib/CLucene/analysis/cjk/CJKAnalyzer.cpp \
+    clucene-contrib-lib/CLucene/analysis/de/GermanAnalyzer.cpp \
+    clucene-contrib-lib/CLucene/analysis/de/GermanStemFilter.cpp \
+    clucene-contrib-lib/CLucene/analysis/de/GermanStemmer.cpp \
+    clucene-contrib-lib/CLucene/analysis/LanguageBasedAnalyzer.cpp \
+    #clucene-contrib-lib/CLucene/analysis/PorterStemmer.cpp \
+    clucene-contrib-lib/CLucene/highlighter/Encoder.cpp \
+    clucene-contrib-lib/CLucene/highlighter/Formatter.cpp \
+    clucene-contrib-lib/CLucene/highlighter/Fragmenter.cpp \
+    clucene-contrib-lib/CLucene/highlighter/Highlighter.cpp \
+    clucene-contrib-lib/CLucene/highlighter/QueryScorer.cpp \
+    clucene-contrib-lib/CLucene/highlighter/QueryTermExtractor.cpp \
+    clucene-contrib-lib/CLucene/highlighter/SimpleFragmenter.cpp \
+    clucene-contrib-lib/CLucene/highlighter/SimpleHTMLEncoder.cpp \
+    clucene-contrib-lib/CLucene/highlighter/SimpleHTMLFormatter.cpp \
+    clucene-contrib-lib/CLucene/highlighter/TextFragment.cpp \
+    clucene-contrib-lib/CLucene/highlighter/TokenGroup.cpp \
+    clucene-contrib-lib/CLucene/highlighter/TokenSources.cpp \
+    clucene-contrib-lib/CLucene/highlighter/WeightedTerm.cpp \
+    clucene-contrib-lib/CLucene/snowball/Snowball.cpp \
+    clucene-contrib-lib/CLucene/util/gzipcompressstream.cpp \
+    clucene-contrib-lib/CLucene/util/gzipinputstream.cpp \
+    clucene-contrib-lib/CLucene/snowball/libstemmer/libstemmer.c \
+    clucene-contrib-lib/CLucene/snowball/runtime/api.c \
+    clucene-contrib-lib/CLucene/snowball/runtime/utilities.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_danish.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_dutch.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_english.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_finnish.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_french.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_german.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_italian.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_norwegian.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_porter.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_portuguese.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_spanish.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_swedish.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_KOI8_R_russian.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_danish.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_dutch.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_english.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_finnish.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_french.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_german.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_italian.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_norwegian.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_porter.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_portuguese.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_russian.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_spanish.c \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_swedish.c \
+    searcher/seacherHighlightFormatter.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -566,7 +628,68 @@ HEADERS  += mainwindow.h \
     lucy/lucy.h \
     lucy/lucyindexer.h \
     lucy/lucysearcher.h \
-    searcher/searcher.h
+    searcher/searcher.h \
+    clucene-contrib-lib/CLucene/analysis/cjk/CJKAnalyzer.h \
+    clucene-contrib-lib/CLucene/analysis/de/GermanAnalyzer.h \
+    clucene-contrib-lib/CLucene/analysis/de/GermanStemFilter.h \
+    clucene-contrib-lib/CLucene/analysis/de/GermanStemmer.h \
+    clucene-contrib-lib/CLucene/analysis/LanguageBasedAnalyzer.h \
+    #clucene-contrib-lib/CLucene/analysis/PorterStemmer.h \
+    clucene-contrib-lib/CLucene/highlighter/Encoder.h \
+    clucene-contrib-lib/CLucene/highlighter/Formatter.h \
+    clucene-contrib-lib/CLucene/highlighter/Fragmenter.h \
+    clucene-contrib-lib/CLucene/highlighter/Highlighter.h \
+    clucene-contrib-lib/CLucene/highlighter/HighlightScorer.h \
+    clucene-contrib-lib/CLucene/highlighter/QueryScorer.h \
+    clucene-contrib-lib/CLucene/highlighter/QueryTermExtractor.h \
+    clucene-contrib-lib/CLucene/highlighter/Scorer.h \
+    clucene-contrib-lib/CLucene/highlighter/SimpleFragmenter.h \
+    clucene-contrib-lib/CLucene/highlighter/SimpleHTMLEncoder.h \
+    clucene-contrib-lib/CLucene/highlighter/SimpleHTMLFormatter.h \
+    clucene-contrib-lib/CLucene/highlighter/TextFragment.h \
+    clucene-contrib-lib/CLucene/highlighter/TokenGroup.h \
+    clucene-contrib-lib/CLucene/highlighter/TokenSources.h \
+    clucene-contrib-lib/CLucene/highlighter/WeightedTerm.h \
+    clucene-contrib-lib/CLucene/snowball/include/libstemmer.h \
+    clucene-contrib-lib/CLucene/snowball/libstemmer/modules.h \
+    clucene-contrib-lib/CLucene/snowball/runtime/api.h \
+    clucene-contrib-lib/CLucene/snowball/runtime/header.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_danish.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_dutch.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_english.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_finnish.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_french.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_german.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_italian.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_norwegian.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_porter.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_portuguese.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_spanish.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_ISO_8859_1_swedish.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_KOI8_R_russian.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_danish.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_dutch.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_english.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_finnish.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_french.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_german.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_italian.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_norwegian.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_porter.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_portuguese.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_russian.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_spanish.h \
+    clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_swedish.h \
+    clucene-contrib-lib/CLucene/snowball/libstemmer.h \
+    clucene-contrib-lib/CLucene/snowball/SnowballAnalyzer.h \
+    clucene-contrib-lib/CLucene/snowball/SnowballFilter.h \
+    clucene-contrib-lib/CLucene/util/arrayinputstream.h \
+    clucene-contrib-lib/CLucene/util/byteinputstream.h \
+    clucene-contrib-lib/CLucene/util/gzipcompressstream.h \
+    clucene-contrib-lib/CLucene/util/gzipinputstream.h \
+    clucene-contrib-lib/CLucene/util/streamarray.h \
+    searcher/seacherHighlightFormatter.h \
+    globalinclude.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \
@@ -577,7 +700,8 @@ RESOURCES += \
 
 DISTFILES += ico.ico \
     zlib/algorithm.txt \
-    clucene/clucene-core-2.3.3.4.-
+    clucene/clucene-core-2.3.3.4.- \
+    clucene-contrib-lib/CLucene/snowball/snowball.version
 
 RC_FILE = res.rc
 
@@ -587,5 +711,6 @@ INCLUDEPATH += ./searcher
 
 INCLUDEPATH += ./java/include/win32
 INCLUDEPATH += ./clucene
+INCLUDEPATH += ./clucene-contrib-lib
 INCLUDEPATH += ./zlib
 INCLUDEPATH += ./boost

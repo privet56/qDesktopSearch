@@ -23,8 +23,6 @@ public:
     logger* m_pLog;
     indexer* m_pIndexer;
 
-    static logger* getLogger();
-
 private slots:
     void on_actionExit_triggered();
 

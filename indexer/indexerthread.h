@@ -11,7 +11,11 @@ class indexerThread : public QThread
 {
     Q_OBJECT
 public:
+
     explicit indexerThread(indexerWorker* pWorker, logger* pLogger, jvm* pJvm, QObject *parent = 0);
+    void close();
+    indexerWorker* getWorker();
+    ~indexerThread();
 
 protected:
     indexerWorker* m_pWorker;

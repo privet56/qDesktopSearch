@@ -1,14 +1,15 @@
 #include "lucyindexer.h"
 
-lucyindexer::lucyindexer(logger* pLogger, QObject *parent) : lucy(pLogger, parent), m_pIndexWriter(nullptr), m_iIndexedFiles(0)
+lucyindexer::lucyindexer(logger* pLogger, QObject *parent) : lucy(pLogger, parent), m_pIndexWriter(nullptr), m_iIndexedFiles(0), m_bNewIndex(false)
 {
 
 }
 
-void lucyindexer::open()
+void lucyindexer::open(QString sDir2Index)
 {
-    lucy::open();
+    lucy::open(sDir2Index);
     bool bReCreate = !m_pDirectory->fileExists("segments.gen");
+    m_bNewIndex = bReCreate;
 
     //m_pIndexWriter  = new IndexWriter(m_pDirectory, m_pAnalyzer, bReCreate/*recreate*/, true/*closeDirOnShutdown*/);   //is thread safe!
 
@@ -18,10 +19,20 @@ void lucyindexer::open()
     m_pIndexWriter->setMaxFieldLength(INT_MAX);
 }
 
-lucyindexer::~lucyindexer()
+void lucyindexer::close()
 {
     if( m_pIndexWriter)
+    {
         m_pIndexWriter->close();
+        delete m_pIndexWriter;
+    }
+
+    m_pIndexWriter = nullptr;
+}
+
+lucyindexer::~lucyindexer()
+{
+    close();
 }
 
 bool lucyindexer::isIndexed(QString sAbsPathName, QFileInfo finfo)
@@ -49,6 +60,10 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
         if(iDeletedFiles > 1)
         {
             this->m_pLogger->wrn("too much files deleted(iDeletedFiles:"+QString::number(iDeletedFiles)+", id_fn:{"+id_fn+"}) fn:{"+sAbsPathName+"}");
+        }
+        else if(m_bNewIndex && (iDeletedFiles > 0))
+        {
+            this->m_pLogger->wrn("too much files in NEW idx deleted(iDeletedFiles:"+QString::number(iDeletedFiles)+", id_fn:{"+id_fn+"}) fn:{"+sAbsPathName+"}");
         }
     }
 
@@ -80,6 +95,7 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
 
     if((m_iIndexedFiles % 100000) == 0) //TODO: if(win64)->100000 if(win32)->10000
     {
+        this->m_pLogger->wrn("optimizing...");
         m_pIndexWriter->flush();
         m_pIndexWriter->optimize();
     }
@@ -87,8 +103,11 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
 
 void lucyindexer::onIndexerThreadFinished()
 {
-    m_pIndexWriter->flush();
-    m_pIndexWriter->optimize();
+    if(m_pIndexWriter)
+    {
+        m_pIndexWriter->flush();
+        m_pIndexWriter->optimize();
+    }
 }
 
 int lucyindexer::getNrOfIndexedFiles()
@@ -97,7 +116,9 @@ int lucyindexer::getNrOfIndexedFiles()
 }
 int lucyindexer::getNrOfFilesInIndex()
 {
-    return this->m_pIndexWriter->docCount();
+    if(this->m_pIndexWriter)
+        return this->m_pIndexWriter->docCount();
+    return 0;
 }
 
 QString lucyindexer::getIdFNandDATE(QString sAbsPathName, QFileInfo finfo)
