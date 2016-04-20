@@ -16,5 +16,7 @@
 		<file>res/bun.png</file>
 		<file>res/hit.png</file>
 		<file>res/css.css</file>
+		<file>res/add.png</file>
+		<file>res/remove.png</file>
     </qresource>
 </RCC>

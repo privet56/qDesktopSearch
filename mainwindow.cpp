@@ -9,7 +9,9 @@ MainWindow::MainWindow(QSplashScreen* pSplash, logger* pLog, indexer* pIndexer, 
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     ui->scrollAreaWidgetContents->setEnv(this->m_pLog, this->m_pIndexer);
+    ui->scrollAreaWidgetContents_2->setEnv(this->m_pLog, this->m_pIndexer);
 
     this->ui->eLog->SetStatusBar(this->statusBar());
     this->m_pLog->SetLogWnd(this->ui->eLog);
@@ -17,8 +19,7 @@ MainWindow::MainWindow(QSplashScreen* pSplash, logger* pLog, indexer* pIndexer, 
     QTimer::singleShot(999, pSplash, SLOT(close()));
     this->m_pLog->inf("App Startup Finished");
 
-    QString sDir2Index(this->m_pLog->GetCfg()->getValue("dir2index"));
-    m_pIndexer->add(sDir2Index);
+    m_pIndexer->init();
 }
 
 MainWindow::~MainWindow()

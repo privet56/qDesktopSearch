@@ -93,7 +93,7 @@ QString searcher::GetHitEnv(int iHitNr)
     seacherHighlightFormatter* pHLFormatter = &hl_formatter;
     Formatter* pFormatter = pHLFormatter;
     Highlighter highlighter(pFormatter, &scorer);
-    SimpleFragmenter frag(20);
+    SimpleFragmenter frag(50);
     highlighter.setTextFragmenter(&frag);
 
     {

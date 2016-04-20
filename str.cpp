@@ -17,6 +17,10 @@ QString str::normalizePath(QString sPath, bool bLowerCase)
     sPath = sPath.replace('\\','/').trimmed();
     if(bLowerCase)
         sPath = sPath.toLower();
+
+    while(sPath.endsWith('/'))
+        sPath = sPath.left(sPath.length()-1);
+
     return sPath;
 }
 

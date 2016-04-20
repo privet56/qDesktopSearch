@@ -18,6 +18,7 @@ public:
     bool isIndexing(QString sDir2Index);
     void stopAll();
     bool isStoppedAll();
+    void init();
 
 protected:
     QMap<QString, indexerThread*> m_pWorkers;

@@ -37,6 +37,8 @@ void wSearch::on_eSearchTerm_textChanged(const QString &arg1)
 
 void wSearch::on_commandLinkButtonSearch_clicked()
 {
+    QTime t;
+    t.start();
     QPair<QString, QString> pair;
     pair.first  = this->ui->eSearchTerm->text();
     pair.second = QString::fromStdWString(FIELDNAME_FULLTEXT);
@@ -51,7 +53,7 @@ void wSearch::on_commandLinkButtonSearch_clicked()
     this->ui->tableView->setModel(pModel);
     delete pModel2;
     pModel2 = nullptr;
-    this->ui->lHitCount->setText(QString::number(hits)+" hits found");
+    this->ui->lHitCount->setText(QString::number(hits)+" hits found in "+logger::t_elapsed(t.elapsed()));
 }
 
 void wSearch::on_tableView_clicked(const QModelIndex &index)

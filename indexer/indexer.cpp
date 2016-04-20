@@ -1,4 +1,5 @@
 #include "indexer.h"
+#include "globalinclude.h"
 #include "str.h"
 #include "indexerworker.h"
 #include "indexerthread.h"
@@ -9,11 +10,28 @@ indexer::indexer(logger* pLogger, jvm* pJvm/*, lucyindexer* pLucyIndexer*/, QObj
 
 }
 
+void indexer::init()
+{
+    QString sDirs2Index(this->m_pLogger->GetCfg()->getValue(DIRS2INDEX));
+    QStringList sl = sDirs2Index.split('|', QString::SkipEmptyParts);
+    for(int i=0;i<sl.length();i++)
+    {
+        add(sl.at(i));
+    }
+}
+
 void indexer::add(QString sDir2Index)
 {
     if(str::isempty(sDir2Index))
     {
         m_pLogger->inf("not indexing "+sDir2Index);
+        return;
+    }
+
+    QDir d(sDir2Index);
+    if(!d.exists(sDir2Index))
+    {
+        m_pLogger->inf("not indexing invalid path "+sDir2Index);
         return;
     }
 
