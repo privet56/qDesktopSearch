@@ -39,6 +39,7 @@ protected:
     void addMetaContents(QMap<QString, QStringList>* pMetas, QString sMetaName, QString sMetaValue);
     void enrichMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMetaContents, QFileInfo finfo);
     void finishIndexing(bool bInterruptionRequested);
+    int delDeletedFiles();
 
 signals:
     void finished();

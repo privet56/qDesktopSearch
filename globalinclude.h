@@ -6,6 +6,7 @@
 
 #define FIELDNAME_FULLTEXT _T("text")
 #define FIELDNAME_FILENAME _T("filename")
+#define FIELDNAME_ABSPATHNAME _T("pathname")
 #define ID_FN _T("id_fn")
 #define ID_FNANDDATE _T("id_fnanddate")
 

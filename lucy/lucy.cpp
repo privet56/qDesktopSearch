@@ -45,7 +45,12 @@ void lucy::open(QString sDir2Index)
     this->m_sDir2Index = sDir2Index;
     this->m_sDirIndex  = sAbsDirIdx;
 
-    QFile::remove(str::makeAbsFN(this->m_sDirIndex, "write.lock")); //file is there if app crashed
+    {
+        QString sAbsFNLock(str::makeAbsFN(this->m_sDirIndex, "write.lock"));
+        QFile::remove(sAbsFNLock); //file is there if app crashed
+        if(QFile::exists(sAbsFNLock))
+            m_pLogger->err("index locked:"+sAbsFNLock);
+    }
 
     m_pAnalyzer     = new WhitespaceAnalyzer();//StandardAnalyzer();   //alternative: SimpleAnalyzer
     m_pDirectory    = FSDirectory::getDirectory(sAbsDirIdx.toLatin1());

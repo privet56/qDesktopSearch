@@ -21,40 +21,32 @@ void indexerWorker::doWork()
     t.start();
     while(true)
     {
-        m_iIndexingTime = 0;
-        m_iFoundFiles   = 0;
-        m_iIndexedFiles = 0;
+        m_iIndexingTime     = 0;
+        m_iFoundFiles       = 0;
+        m_iIndexedFiles     = 0;
+        int iDeletedFiles   = 0;
 
-        if (this->m_pLucyIndexer)
-        {
-            this->m_pLucyIndexer->onIndexerThreadFinished();
+        {   //opt
+            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
+            if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished();
         }
-        if(QThread::currentThread()->isInterruptionRequested())
-        {
-            finishIndexing(true);
-            return;
+        {   //idx
+            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
+            dir(m_sDir2Index);
         }
-        dir(m_sDir2Index);
-        if(QThread::currentThread()->isInterruptionRequested())
-        {
-            finishIndexing(true);
-            return;
+        {   //opt
+            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
+            if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished();
         }
-        if (this->m_pLucyIndexer)
-        {
-            this->m_pLucyIndexer->onIndexerThreadFinished();
-        }
-        if(QThread::currentThread()->isInterruptionRequested())
-        {
-            finishIndexing(true);
-            return;
+        {   //del
+            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
+            iDeletedFiles = delDeletedFiles();
         }
 
         m_iIndexingTime = t.elapsed();
-        m_pLogger->inf("an indexer thread finished. found#:"+QString::number(getNrOfFoundFiles())+" indexed#:"+QString::number(getNrOfIndexedFiles())+" NrOfFilesInIdx:"+QString::number(getNrOfFilesInIndex())+" time:"+logger::t_elapsed(getIndexTime())+"  dir:"+getIndexedDir());
-        QThread::msleep(99999/*milliseconds*/);
+        m_pLogger->inf("an indexer thread finished. found#:"+QString::number(getNrOfFoundFiles())+" indexed#:"+QString::number(getNrOfIndexedFiles())+" NrOfFilesInIdx:"+QString::number(getNrOfFilesInIndex())+" deleteds:"+QString::number(iDeletedFiles)+" time:"+logger::t_elapsed(getIndexTime())+"  dir:"+getIndexedDir());
+        //QThread::msleep(99999/*milliseconds*/);   //how to handle isInterruptionRequested?
         t.restart();
-        //TODO: remove fnf files from index
     }
 
     emit finished();
@@ -62,8 +54,6 @@ void indexerWorker::doWork()
 
 void indexerWorker::dir(QString sDir)
 {
-    //TODO: how to handle deleted files???
-
     //is recursive!
     QDirIterator it(sDir, QStringList() << "*", QDir::Files | QDir::Dirs | QDir::NoDotDot | QDir::NoDot | QDir::NoSymLinks, QDirIterator::Subdirectories);
     while (it.hasNext())
@@ -134,7 +124,7 @@ void indexerWorker::file(QString sAbsPathName, QFileInfo finfo)
 
 void indexerWorker::enrichMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMetas, QFileInfo finfo)
 {
-    this->addMetaContents(pMetas, "pathname", sAbsPathName);
+    this->addMetaContents(pMetas, QString::fromStdWString(FIELDNAME_ABSPATHNAME), sAbsPathName);
 
     {
         QString sDir(finfo.path());
@@ -236,4 +226,42 @@ void indexerWorker::finishIndexing(bool bInterruptionRequested)
     {
         QThread::currentThread()->terminate();
     }
+}
+
+int indexerWorker::delDeletedFiles()
+{
+    QString sFieldNameAbsPathName = QString::fromStdWString(FIELDNAME_ABSPATHNAME);
+    int iDeletedDocs = 0;
+    IndexModifier* pIndexer = m_pLucyIndexer->getIndexer();
+    int32_t maxDoc = pIndexer->docCount();
+    for(int i=maxDoc-1; i>-1; i--)
+    {
+        if(QThread::currentThread()->isInterruptionRequested()) { break; }
+        Document* pDoc = pIndexer->document(i);
+        if(!pDoc)
+        {
+            m_pLogger->wrn("!doc for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
+            continue;
+        }
+        QString sAbsPathName = QString::fromStdWString(pDoc->get(sFieldNameAbsPathName.toStdWString().c_str()));
+        _CLDELETE(pDoc);
+        pDoc = nullptr;
+
+        {
+            if(str::isempty(sAbsPathName, true))
+            {
+                m_pLogger->wrn("!doc-absfn for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
+            }
+            bool bExists = QFile::exists(sAbsPathName);
+
+            if(!bExists)
+            {
+                if(QThread::currentThread()->isInterruptionRequested()) { break; }
+                pIndexer->deleteDocument(i);
+                iDeletedDocs++;
+            }
+        }
+    }
+
+    return iDeletedDocs;
 }

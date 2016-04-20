@@ -24,6 +24,7 @@ public:
     void index(QString sAbsPathName, QMap<QString, QStringList>* pMetaContents, QFileInfo finfo);
     void onIndexerThreadFinished();
     QString getIdFNandDATE(QString sAbsPathName, QFileInfo finfo);
+    IndexModifier* getIndexer();
 
 protected:
     //IndexWriter* m_pIndexWriter;

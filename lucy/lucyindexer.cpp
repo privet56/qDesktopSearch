@@ -128,3 +128,7 @@ QString lucyindexer::getIdFNandDATE(QString sAbsPathName, QFileInfo finfo)
     sAbsPathName = str::normalizePath(sAbsPathName, false);
     return QString::number(qHash(sAbsPathName)) + "_" + QString::number(finfo.lastModified().toTime_t());
 }
+IndexModifier* lucyindexer::getIndexer()
+{
+    return this->m_pIndexWriter;
+}
