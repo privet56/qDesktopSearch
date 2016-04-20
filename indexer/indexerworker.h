@@ -25,6 +25,7 @@ public:
     lucyindexer* getIndexer();
 
 protected:
+    QTime t;
     QString m_sDir2Index;
     logger* m_pLogger;
     lucyindexer* m_pLucyIndexer;
@@ -37,6 +38,7 @@ protected:
     void file(QString sAbsPathName, QFileInfo finfo);
     void addMetaContents(QMap<QString, QStringList>* pMetas, QString sMetaName, QString sMetaValue);
     void enrichMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMetaContents, QFileInfo finfo);
+    void finishIndexing(bool bInterruptionRequested);
 
 signals:
     void finished();

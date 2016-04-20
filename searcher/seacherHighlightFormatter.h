@@ -23,11 +23,15 @@ public:
         }
         numHighlights++; //update stats used in assertions
 
-        int len = (int)_tcslen(originalText) + 7;
+        //7  = <b></b>
+        //32 = <b><font color='red'></font></b>
+        int len = (int)_tcslen(originalText) + 32;//7;
         TCHAR* ret = _CL_NEWARRAY(TCHAR, len + 1);
-        _tcscpy(ret, _T("*"));
+        _tcscpy(ret, _T("<b><font color='red'>"));
+        //_tcscpy(ret, _T("<b>"));
         _tcscat(ret, originalText);
-        _tcscat(ret, _T("*"));
+        _tcscat(ret, _T("</font></b>"));
+        //_tcscat(ret, _T("</b>"));
 
         return ret;
     }

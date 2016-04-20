@@ -6,6 +6,7 @@
 #include "wsearchresultmodel.h"
 #include <QPair>
 #include <QList>
+#include "wsearchitemdelegate.h"
 
 wSearch::wSearch(QWidget *parent) :
     QFrame(parent),
@@ -18,6 +19,7 @@ wSearch::wSearch(QWidget *parent) :
     {
         wsearchresultModel* pWsearchresultModel = new wsearchresultModel(new searcher(), this->ui->tableView);
         this->ui->tableView->setModel(pWsearchresultModel);
+        this->ui->tableView->setItemDelegate(new wsearchitemdelegate(this->ui->tableView));
     }
 
     on_eSearchTerm_textChanged("");

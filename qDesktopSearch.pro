@@ -247,7 +247,8 @@ SOURCES += main.cpp\
     clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_russian.c \
     clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_spanish.c \
     clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_swedish.c \
-    searcher/seacherHighlightFormatter.cpp
+    searcher/seacherHighlightFormatter.cpp \
+    searcher/wsearchitemdelegate.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -689,7 +690,8 @@ HEADERS  += mainwindow.h \
     clucene-contrib-lib/CLucene/util/gzipinputstream.h \
     clucene-contrib-lib/CLucene/util/streamarray.h \
     searcher/seacherHighlightFormatter.h \
-    globalinclude.h
+    globalinclude.h \
+    searcher/wsearchitemdelegate.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \

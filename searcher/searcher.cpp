@@ -99,7 +99,7 @@ QString searcher::GetHitEnv(int iHitNr)
     {
         const TCHAR* text = m_hits->doc(iHitNr).get(FIELDNAME_FULLTEXT);
         if(!text)return "";
-        int maxNumFragmentsRequired     = 1;
+        int maxNumFragmentsRequired     = 3;
         const TCHAR* fragmentSeparator  = _T("...");
         StringReader reader(text);
         TokenStream* tokenStream = this->m_lucysearchables.at(0)->getAnalyzer()->tokenStream(FIELDNAME_FULLTEXT, &reader);
@@ -118,6 +118,8 @@ QString searcher::GetHitEnv(int iHitNr)
 
         _CLDELETE_CARRAY(result);
         _CLDELETE(tokenStream);
+
+        sHitEnv.replace('\n', ' ').replace('\t', ' ').replace("  ", " ");
 
         return sHitEnv;
     }

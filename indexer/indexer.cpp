@@ -42,8 +42,9 @@ bool indexer::isIndexing(QString sDir2Index)
 
 void indexer::onThreadFinished()
 {
-    //QObject* pSignalSender = sender();
-    //indexerWorker* pWorker = qobject_cast<indexerWorker*>(pSignalSender);
+    QObject* pSignalSender = sender();
+    indexerWorker* pWorker = qobject_cast<indexerWorker*>(pSignalSender);
+    //TODO: remove from m_pWorkers!
 }
 
 void indexer::stopAll()

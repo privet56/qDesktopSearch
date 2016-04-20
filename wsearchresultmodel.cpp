@@ -107,6 +107,10 @@ QVariant wsearchresultModel::headerData(int section, Qt::Orientation orientation
         {
             return QIcon(":/res/hit.png");
         }
+        if (orientation == Qt::Horizontal)
+        {
+            //return QIcon(":/res/hit.png");
+        }
     }
     else if(role == Qt::SizeHintRole)
     {
@@ -159,4 +163,8 @@ int wsearchresultModel::search(QList<QPair<QString, QString>> lpSearchinputs)
 {
     int iHits = this->m_pSearcher->search(lpSearchinputs);
     return iHits;
+}
+QModelIndex wsearchresultModel::buddy(const QModelIndex &index) const
+{
+    return index;
 }
