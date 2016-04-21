@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui widgets
 #QT       += androidextras
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

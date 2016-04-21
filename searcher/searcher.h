@@ -26,6 +26,7 @@ public:
     QString GetHitAttr(int iHitNr, QString sAttrName);
     QString GetHitEnv(int iHitNr);
     void cleanup(bool bConstructor);
+    void sortBy(QString sSortFieldName, Qt::SortOrder order);
 
 protected:
     logger* m_pLog;
@@ -38,6 +39,7 @@ protected:
     ArrayBase<Query*>* m_aquerys;
     BooleanQuery* m_query;
     Hits* m_hits;
+    Sort* m_sort;
 
 signals:
 

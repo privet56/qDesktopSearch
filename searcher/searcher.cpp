@@ -9,6 +9,7 @@ searcher::searcher(QObject *parent) : QObject(parent),
     m_aquerys(nullptr),
     m_searchables(nullptr),
     m_query(nullptr),
+    m_sort(nullptr),
     m_hits(nullptr)
 {
     cleanup(true);
@@ -57,8 +58,8 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
         m_query->add(QueryParser::parse(sSearchString.toStdWString().c_str(), sSearchField.toStdWString().c_str(), lucy::getNewAnalyzer()), true/*handle delete*/, BooleanClause::SHOULD);
     }
 
-    //TODO: sort by score
-    m_hits = m_pMultiSearcher->search(m_query);
+    m_sort = _CLNEW Sort(SortField::FIELD_SCORE()/*=? RELEVANCE*/);
+    m_hits = m_pMultiSearcher->search(m_query, m_sort);
 
     int iHits = (int)(m_hits == nullptr ? 0 : m_hits->length());
 
@@ -75,6 +76,8 @@ int searcher::getHitCount()
 
 QString searcher::GetHitAttr(int iHitNr, QString sAttrName)
 {
+    if(!m_hits)return "";
+
     Document* d = &(m_hits->doc(iHitNr));
     const TCHAR* pAttrValue = d->get(sAttrName.toStdWString().c_str());
 
@@ -88,6 +91,8 @@ QString searcher::GetHitAttr(int iHitNr, QString sAttrName)
 
 QString searcher::GetHitEnv(int iHitNr)
 {
+    if(!m_hits)return "";
+
     QueryScorer scorer(m_query);
     seacherHighlightFormatter hl_formatter;
     seacherHighlightFormatter* pHLFormatter = &hl_formatter;
@@ -148,6 +153,11 @@ void searcher::cleanup(bool bConstructor)
         delete m_hits;
         m_hits = nullptr;
     }
+    if(m_sort)
+    {
+        _CLDELETE(m_sort);
+        m_sort = nullptr;
+    }
     if(m_pMultiSearcher)
     {
         m_pMultiSearcher->close();
@@ -170,4 +180,29 @@ void searcher::cleanup(bool bConstructor)
         delete m_lucysearchables.at(i);
     }
     m_lucysearchables.clear();
+}
+
+void searcher::sortBy(QString sSortFieldName, Qt::SortOrder order)
+{
+    if(!m_pMultiSearcher)
+    {   //not yet searched...
+        return;
+    }
+
+    if(m_hits)
+    {
+        delete m_hits;
+        m_hits = nullptr;
+    }
+    if(m_sort)
+    {
+        _CLDELETE(m_sort);
+        m_sort = nullptr;
+    }
+
+    bool bReverse = ((order == Qt::AscendingOrder) ? true : false);
+
+    //TODO: sort case insensitive (eg. with comparator)
+    m_sort = _CLNEW Sort(new SortField(sSortFieldName.toStdWString().c_str(), SortField::STRING, bReverse));
+    m_hits = m_pMultiSearcher->search(m_query, m_sort);
 }

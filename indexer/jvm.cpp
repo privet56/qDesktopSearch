@@ -246,6 +246,9 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
     sAbsPathName = str::normalizePath(sAbsPathName, false);
 
 #ifdef _DEBUG
+    QStringList sl;
+    sl << "fulltext dummy text";
+    pMetas->operator []("text") = sl;
     return;
 #endif
 

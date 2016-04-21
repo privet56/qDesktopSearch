@@ -1,7 +1,8 @@
 #include "wsearchresultmodel.h"
-
+#include "globalinclude.h"
 #include <QBrush>
 #include <QIcon>
+#include <QFileIconProvider>
 
 /*!
  * Creates a model object with the given \a ds and \a parent.
@@ -12,6 +13,21 @@ wsearchresultModel::wsearchresultModel(searcher* pSearcher, QObject *parent)
       m_pLog(nullptr)
 {
 
+}
+
+void wsearchresultModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*/)
+{
+    if(!this->m_pSearcher)
+        return;
+
+    if(column == COL_FILENAME)
+        this->m_pSearcher->sortBy(QString::fromStdWString(FIELDNAME_ABSPATHNAME), order);
+    else if(column == COL_HITENV)
+        this->m_pLog->inf("not sortable by hitenv");
+    else
+        this->m_pLog->wrn("unknown col to be sorted");
+
+    emit layoutChanged();
 }
 
 /*!
@@ -43,7 +59,7 @@ Qt::ItemFlags wsearchresultModel::flags(const QModelIndex &index) const
 
 QVariant wsearchresultModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid() || !m_pSearcher)
         return QVariant();
 
     int hitIndex2BeReturned = index.row();
@@ -51,11 +67,20 @@ QVariant wsearchresultModel::data(const QModelIndex &index, int role) const
 
     if((role == Qt::DisplayRole) || (role == Qt::ToolTipRole) || (role == Qt::StatusTipRole))
     {
-		if(column2BeReturned == 0)
+        if(column2BeReturned == COL_FILENAME)
+        {
+            if(role == Qt::ToolTipRole)
+            {
+                return m_pSearcher->GetHitAttr(hitIndex2BeReturned, QString::fromStdWString(FIELDNAME_ABSPATHNAME));
+            }
             return m_pSearcher->GetHitAttr(hitIndex2BeReturned, QString::fromStdWString(FIELDNAME_FILENAME));
-		if(column2BeReturned == 1)
+        }
+        if(column2BeReturned == COL_HITENV)
+        {
             return m_pSearcher->GetHitEnv(hitIndex2BeReturned);
-		//TODO: wrn
+        }
+
+        this->m_pLog->wrn("unknown role to be returned...");
     }
     else if (role == Qt::EditRole)
     {
@@ -66,7 +91,7 @@ QVariant wsearchresultModel::data(const QModelIndex &index, int role) const
         Qt::Alignment align;
         switch (column2BeReturned)
         {
-            case 0:
+            case COL_FILENAME:
                 align |= Qt::AlignJustify;
             default:
 				align |= Qt::AlignLeft;//Qt::AlignRight,Qt::AlignHCenter,Qt::AlignJustify
@@ -74,7 +99,7 @@ QVariant wsearchresultModel::data(const QModelIndex &index, int role) const
         }
         switch (column2BeReturned)
         {
-            case 0:
+            case COL_FILENAME:
                 align |= Qt::AlignVCenter;
             default:
 				align |= Qt::AlignVCenter;//Qt::AlignRight,Qt::AlignHCenter,Qt::AlignJustify
@@ -102,14 +127,19 @@ QVariant wsearchresultModel::headerData(int section, Qt::Orientation orientation
 {
     if (role == Qt::DecorationRole)
     {
-		//TODO: get file icon
         if (orientation == Qt::Vertical)
         {
+            if(m_pSearcher)
+            {
+                QFileInfo fi(m_pSearcher->GetHitAttr(section, QString::fromStdWString(FIELDNAME_ABSPATHNAME)));
+                static QFileIconProvider fip;
+                return fip.icon(fi);
+            }
             return QIcon(":/res/hit.png");
         }
         if (orientation == Qt::Horizontal)
         {
-            //return QIcon(":/res/hit.png");
+
         }
     }
     else if(role == Qt::SizeHintRole)
@@ -127,8 +157,8 @@ QVariant wsearchresultModel::headerData(int section, Qt::Orientation orientation
         if (orientation == Qt::Horizontal)
         {
 			//column headers
-			if(section == 0)return "file name";
-			if(section == 1)return "hit environment";
+            if(section == COL_FILENAME)  return "file name";
+            if(section == COL_HITENV)    return "hit environment";
         }
         else
         {

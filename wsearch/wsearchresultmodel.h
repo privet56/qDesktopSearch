@@ -6,6 +6,8 @@
 #include "logger.h"
 #include "indexer.h"
 
+
+
 class wsearchresultModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -23,7 +25,11 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
     virtual QModelIndex buddy(const QModelIndex &index) const;
+    virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
     void reset();
+
+    static const int COL_FILENAME  = 0;
+    static const int COL_HITENV    = 1;
 
 protected:
     searcher* m_pSearcher;

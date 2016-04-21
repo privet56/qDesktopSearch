@@ -55,6 +55,8 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
     QString id_fnAndDate    = getIdFNandDATE(sAbsPathName, finfo);
 
     {   //delete old version, if there
+        //TODO: don't delete in NEW index
+        //TODO: is qHash enough to identify a record?
         Term* term = _CLNEW Term(ID_FN, id_fn.toStdWString().c_str());
         int32_t iDeletedFiles = m_pIndexWriter->deleteDocuments(term);
         _CLDECDELETE(term);

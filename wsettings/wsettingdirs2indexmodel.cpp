@@ -118,7 +118,7 @@ QVariant wsettingdirs2indexModel::headerData(int section, Qt::Orientation orient
         if (orientation == Qt::Horizontal)
         {
 			//column headers
-			if(section == 0)return "Directory to be indexed";
+            if(section == 0)return "Directories to be indexed";
         }
         else
         {

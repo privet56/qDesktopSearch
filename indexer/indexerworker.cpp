@@ -61,7 +61,8 @@ void indexerWorker::doWork()
 void indexerWorker::dir(QString sDir)
 {
     //is recursive!
-    QDirIterator it(sDir, QStringList() << "*", QDir::Files | QDir::Dirs | QDir::NoDotDot | QDir::NoDot | QDir::NoSymLinks, QDirIterator::Subdirectories);
+    QDirIterator it(sDir+(sDir.endsWith(QDir::separator()) ? QString("") : QDir::separator()), QStringList() << "*", QDir::Files | QDir::Dirs | QDir::NoDotDot | QDir::NoDot, QDirIterator::Subdirectories);
+    bool bFound=false;
     while (it.hasNext())
     {
         if(QThread::currentThread()->isInterruptionRequested())
@@ -74,8 +75,13 @@ void indexerWorker::dir(QString sDir)
         QFileInfo finfo(sEntry);
         if(finfo.isFile())
         {
+            bFound = true;
             file(sEntry, finfo);
         }
+    }
+    if(!bFound)
+    {
+        m_pLogger->wrn("no file found in '"+sDir+"'");
     }
 }
 
