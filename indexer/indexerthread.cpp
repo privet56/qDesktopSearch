@@ -6,11 +6,11 @@ indexerThread::indexerThread(indexerWorker* pWorker, logger* pLogger, jvm* pJvm,
 
 }
 
-void indexerThread::close()
+void indexerThread::close(bool bDeleteCompleteIndex/*=false*/)
 {
     if(m_pWorker)
     {
-        m_pWorker->close();
+        m_pWorker->close(bDeleteCompleteIndex);
         delete m_pWorker;
     }
     m_pWorker = nullptr;

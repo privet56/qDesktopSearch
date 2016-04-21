@@ -54,7 +54,7 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
         QPair<QString, QString> pSearchInput = lpSearchinputs.at(i);
         QString sSearchString = pSearchInput.first;
         QString sSearchField  = pSearchInput.second;
-        m_query->add(QueryParser::parse(sSearchString.toStdWString().c_str(), sSearchField.toStdWString().c_str(), new WhitespaceAnalyzer()), true/*handle delete*/, BooleanClause::SHOULD);
+        m_query->add(QueryParser::parse(sSearchString.toStdWString().c_str(), sSearchField.toStdWString().c_str(), lucy::getNewAnalyzer()), true/*handle delete*/, BooleanClause::SHOULD);
     }
 
     //TODO: sort by score

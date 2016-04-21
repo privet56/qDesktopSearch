@@ -2,6 +2,7 @@
 #include "logger.h"
 #include "cfg.h"
 #include "str.h"
+#include "f.h"
 #include <QApplication>
 
 lucy::lucy(logger* pLogger, QObject *parent) : QObject(parent), m_pLogger(pLogger), m_pAnalyzer(nullptr), m_pDirectory(nullptr)
@@ -9,7 +10,7 @@ lucy::lucy(logger* pLogger, QObject *parent) : QObject(parent), m_pLogger(pLogge
 
 }
 
-void lucy::close()
+void lucy::close(bool bDeleteCompleteIndex/*=false*/)
 {
     {
         if( m_pDirectory)
@@ -26,6 +27,14 @@ void lucy::close()
         }
         m_pAnalyzer = nullptr;
     }
+    if(bDeleteCompleteIndex)
+    {
+        QDir src(this->m_sDirIndex);
+        if(!f::emptydir(this->m_sDirIndex, this->m_pLogger) || !src.removeRecursively())
+            m_pLogger->wrn("could not delete idx "+this->m_sDirIndex);
+        else
+            m_pLogger->inf("idx deleted "+this->m_sDirIndex);
+    }
 }
 
 lucy::~lucy()
@@ -33,13 +42,20 @@ lucy::~lucy()
     close();
 }
 
-void lucy::open(QString sDir2Index)
+QString lucy::idxDir4Dir2Index(QString sDir2Index)
 {
     sDir2Index = str::normalizePath(sDir2Index, false);
     QString sBaseDirIdx(str::makeAbsFN(qApp->applicationDirPath(), "idx"));
     cfg::mkdirfull(sBaseDirIdx);
     QString sIdxSubDir = QString::number(qHash(sDir2Index));
     QString sAbsDirIdx = str::makeAbsFN(sBaseDirIdx, sIdxSubDir);
+    return sAbsDirIdx;
+}
+
+void lucy::open(QString sDir2Index)
+{
+    sDir2Index = str::normalizePath(sDir2Index, false);
+    QString sAbsDirIdx(lucy::idxDir4Dir2Index(sDir2Index));
     cfg::mkdirfull(sAbsDirIdx);
 
     this->m_sDir2Index = sDir2Index;
@@ -52,7 +68,9 @@ void lucy::open(QString sDir2Index)
             m_pLogger->err("index locked:"+sAbsFNLock);
     }
 
-    m_pAnalyzer     = new WhitespaceAnalyzer();//StandardAnalyzer();   //alternative: SimpleAnalyzer
+    //TODO: make it case-insensitive & whitespace sensitive
+
+    m_pAnalyzer     = lucy::getNewAnalyzer();
     m_pDirectory    = FSDirectory::getDirectory(sAbsDirIdx.toLatin1());
 }
 lucene::analysis::Analyzer* lucy::getAnalyzer()
@@ -66,4 +84,8 @@ Directory* lucy::getDirectory()
 void lucy::setDirectory(Directory* pDirectory)
 {
     this->m_pDirectory = pDirectory;
+}
+Analyzer* lucy::getNewAnalyzer()
+{
+    return  new StandardAnalyzer();//WhitespaceAnalyzer|StopAnalyzer|StandardAnalyzer|SimpleAnalyzer
 }

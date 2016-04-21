@@ -20,6 +20,7 @@ public:
     static bool mkdirfull(QString sDir);
 
 signals:
+    void cfgChanged(QString sCfgEntryName, QString sCfgEntryValue);
 
 public slots:
 };

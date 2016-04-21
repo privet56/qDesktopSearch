@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    //TODO: start as admin?
     //TODO: singleInstance!
 
 //splash

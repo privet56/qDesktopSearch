@@ -36,10 +36,12 @@ public:
     explicit lucy(logger* pLogger, QObject *parent = 0);
     ~lucy();
     virtual void open(QString sDir2Index);
-    virtual void close();
+    virtual void close(bool bDeleteCompleteIndex=false);
     lucene::analysis::Analyzer* getAnalyzer();
     Directory* getDirectory();
     void setDirectory(Directory* pDirectory);
+    static QString idxDir4Dir2Index(QString sDir2Index);
+    static Analyzer* getNewAnalyzer();
 
 protected:
     logger* m_pLogger;

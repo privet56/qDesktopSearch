@@ -17,7 +17,7 @@ public:
     lucyindexer(logger* pLogger, QObject *parent = 0);
     ~lucyindexer();
     void open(QString sDir2Index);
-    virtual void close();
+    virtual void close(bool bDeleteCompleteIndex=false);
     int getNrOfIndexedFiles();
     int getNrOfFilesInIndex();
     bool isIndexed(QString sAbsPathName, QFileInfo finfo);

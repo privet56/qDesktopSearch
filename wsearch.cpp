@@ -23,6 +23,8 @@ wSearch::wSearch(QWidget *parent) :
     }
 
     on_eSearchTerm_textChanged("");
+
+    //TODO: fill(+update later) field dropdown(with multiple selection?)
 }
 
 wSearch::~wSearch()
@@ -63,12 +65,12 @@ void wSearch::on_tableView_clicked(const QModelIndex &index)
 
 void wSearch::on_tableView_doubleClicked(const QModelIndex &index)
 {
-
+    //TODO: open selected
 }
 
 void wSearch::on_tableView_customContextMenuRequested(const QPoint &pos)
 {
-
+    //TODO: show all details
 }
 
 void wSearch::setEnv(logger* pLog, indexer* pIndexer)
@@ -76,4 +78,25 @@ void wSearch::setEnv(logger* pLog, indexer* pIndexer)
     this->m_pLog        = pLog;
     this->m_pIndexer    = pIndexer;
     ((wsearchresultModel*)this->ui->tableView->model())->setEnv(pLog, pIndexer);
+
+    connect(pLog->GetCfg(), SIGNAL(cfgChanged(QString, QString)), this, SLOT(OnCfgChanged(QString, QString)));
+}
+void wSearch::OnCfgChanged(QString sCfgEntryName, QString sCfgEntryValue)
+{
+    if(sCfgEntryName != DIRS2INDEX)
+    {
+        return;
+    }
+
+    wsearchresultModel* pModel = (wsearchresultModel*)this->ui->tableView->model();
+    pModel->reset();
+    wsearchresultModel* pModel2 = new wsearchresultModel(nullptr, nullptr);
+    //TODO: do it better (emit dataChanged?)
+    this->ui->tableView->setModel(pModel2);
+    this->ui->tableView->setModel(pModel);
+    delete pModel2;
+    pModel2 = nullptr;
+    this->ui->lHitCount->setText("-");
+
+    this->m_pLog->inf("result list resetted because of indexer changes");
 }

@@ -157,7 +157,8 @@ void wsearchresultModel::setEnv(logger* pLog, indexer* pIndexer)
 {
     this->m_pLog        = pLog;
     this->m_pIndexer    = pIndexer;
-    this->m_pSearcher->setEnv(pLog, pIndexer);
+    if (this->m_pSearcher)
+        this->m_pSearcher->setEnv(pLog, pIndexer);
 }
 int wsearchresultModel::search(QList<QPair<QString, QString>> lpSearchinputs)
 {
@@ -167,4 +168,9 @@ int wsearchresultModel::search(QList<QPair<QString, QString>> lpSearchinputs)
 QModelIndex wsearchresultModel::buddy(const QModelIndex &index) const
 {
     return index;
+}
+void wsearchresultModel::reset()
+{
+    if (this->m_pSearcher)
+        this->m_pSearcher->cleanup(false);
 }

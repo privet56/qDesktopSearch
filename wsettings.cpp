@@ -34,8 +34,10 @@ void wSettings::on_toolButtonAdd_clicked()
     if(sl.contains(sDir2Index))return;
     sl.append(sDir2Index);
     this->m_pLog->GetCfg()->setValue(DIRS2INDEX, sl.join('|'));
-    //m_pIndexer->add(aDir2Index);
+
     refreshtableViewDirs(sl.size());
+
+    m_pIndexer->add(sDir2Index);
 }
 
 void wSettings::on_toolButtonDel_clicked()
@@ -51,9 +53,10 @@ void wSettings::on_toolButtonDel_clicked()
     int i2remove = sels.at(0).row();
     QString s2remove = sl.at(i2remove);
     sl.removeAt(i2remove);
-    //m_pIndexer->removeIndex(s2remove);
+
     this->m_pLog->GetCfg()->setValue(DIRS2INDEX, sl.join('|'));
     refreshtableViewDirs(sl.size());
+    m_pIndexer->removeIndex(s2remove);
 }
 
 void wSettings::on_tableViewDirs_clicked(const QModelIndex &index)
@@ -71,6 +74,11 @@ void wSettings::setEnv(logger* pLog, indexer* pIndexer)
 }
 void wSettings::refreshtableViewDirs(int iCfgEntriesLen)
 {
+    //TODO: clear search result list
+    {
+
+    }
+
     wsettingdirs2indexModel* pModel = (wsettingdirs2indexModel*)this->ui->tableViewDirs->model();
     wsettingdirs2indexModel* pModel2 = new wsettingdirs2indexModel(nullptr);
     //TODO: do it better (emit dataChanged?)
@@ -79,8 +87,12 @@ void wSettings::refreshtableViewDirs(int iCfgEntriesLen)
     delete pModel2;
     pModel2 = nullptr;
 
-    this->ui->toolButtonDel->setEnabled(iCfgEntriesLen > 0);
+    {   //handle selection
+        this->ui->toolButtonDel->setEnabled(false);
 
-    if(iCfgEntriesLen > 0)
-        this->ui->tableViewDirs->selectionModel()->select(this->ui->tableViewDirs->rootIndex(), QItemSelectionModel::Select);
+        if(iCfgEntriesLen > 0)
+        {
+            this->ui->tableViewDirs->selectRow(1);
+        }
+    }
 }

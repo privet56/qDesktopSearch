@@ -1,6 +1,7 @@
 #include "indexer.h"
 #include "globalinclude.h"
 #include "str.h"
+#include "f.h"
 #include "indexerworker.h"
 #include "indexerthread.h"
 
@@ -43,8 +44,8 @@ void indexer::add(QString sDir2Index)
     indexerThread* pThread = new indexerThread(pWorker, m_pLogger, m_pJvm);
 
     pWorker->moveToThread(pThread);
-    connect(pThread, SIGNAL(started()), pWorker, SLOT(doWork()));
-    connect(pWorker, SIGNAL(finished()), this, SLOT(onThreadFinished()));
+    connect(pThread, SIGNAL(started()) , pWorker, SLOT(doWork()));
+    connect(pWorker, SIGNAL(finished()), this   , SLOT(onThreadFinished()));
     connect(pWorker, SIGNAL(finished()), pThread, SLOT(terminate()));
     connect(pWorker, SIGNAL(finished()), pThread, SLOT(deleteLater()));
     pThread->start();
@@ -120,5 +121,41 @@ indexer::~indexer()
             delete i.value();
         }
         m_pWorkers.clear();
+    }
+}
+
+void indexer::removeIndex(QString sDir2Index)
+{
+    sDir2Index = str::normalizePath(sDir2Index, false);
+    if(!this->m_pWorkers.contains(sDir2Index))
+    {
+        m_pLogger->inf("cannot remove idx for '"+sDir2Index+"'");
+        return;
+    }
+    indexerThread* pThread = this->m_pWorkers[sDir2Index];
+    if(this->m_pWorkers.remove(sDir2Index) != 1)
+    {
+        m_pLogger->inf("cannot remove idx from idxs for '"+sDir2Index+"'");
+    }
+
+    pThread->requestInterruption();
+    while(pThread->isRunning())
+    {
+        QThread::msleep(99/*milliseconds*/);
+    }
+    pThread->close(true/*'true' does not work here*/);
+    delete pThread;
+    pThread = nullptr;
+
+    {
+        QString sAbsDirIdx(lucy::idxDir4Dir2Index(sDir2Index));
+        QDir src(sAbsDirIdx);
+        if(src.exists())
+        {
+            if(!f::emptydir(sAbsDirIdx, this->m_pLogger) || !src.removeRecursively())
+                m_pLogger->wrn("could not delete idx "+sAbsDirIdx);
+            else
+                m_pLogger->inf("idx deleted "+sAbsDirIdx);
+        }
     }
 }

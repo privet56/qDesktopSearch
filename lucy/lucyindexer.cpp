@@ -19,7 +19,7 @@ void lucyindexer::open(QString sDir2Index)
     m_pIndexWriter->setMaxFieldLength(INT_MAX);
 }
 
-void lucyindexer::close()
+void lucyindexer::close(bool bDeleteCompleteIndex/*=false*/)
 {
     if( m_pIndexWriter)
     {
@@ -28,6 +28,7 @@ void lucyindexer::close()
     }
 
     m_pIndexWriter = nullptr;
+    lucy::close();
 }
 
 lucyindexer::~lucyindexer()

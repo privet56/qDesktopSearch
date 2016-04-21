@@ -186,7 +186,7 @@ SOURCES += main.cpp\
     clucene/CLucene/SharedHeader.cpp \
     clucene/CLucene/StdHeader.cpp \
     clucene/CLucene/config/threads.cpp \
-    str.cpp \
+    util/str.cpp \
     wsearch/wsearchresultmodel.cpp \
     indexer/indexer.cpp \
     indexer/indexerthread.cpp \
@@ -249,7 +249,8 @@ SOURCES += main.cpp\
     clucene-contrib-lib/CLucene/snowball/src_c/stem_UTF_8_swedish.c \
     searcher/seacherHighlightFormatter.cpp \
     searcher/wsearchitemdelegate.cpp \
-    wsettings/wsettingdirs2indexmodel.cpp
+    wsettings/wsettingdirs2indexmodel.cpp \
+    util/f.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -621,7 +622,7 @@ HEADERS  += mainwindow.h \
     clucene/CLucene/SharedHeader.h \
     clucene/CLucene/StdHeader.h \
     clucene/CLucene.h \
-    str.h \
+    util/str.h \
     wsearch/wsearchresultmodel.h \
     indexer/indexer.h \
     indexer/indexerthread.h \
@@ -693,7 +694,8 @@ HEADERS  += mainwindow.h \
     searcher/seacherHighlightFormatter.h \
     globalinclude.h \
     searcher/wsearchitemdelegate.h \
-    wsettings/wsettingdirs2indexmodel.h
+    wsettings/wsettingdirs2indexmodel.h \
+    util/f.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \
@@ -714,6 +716,7 @@ INCLUDEPATH += ./indexer
 INCLUDEPATH += ./searcher
 INCLUDEPATH += ./wsearch
 INCLUDEPATH += ./wsettings
+INCLUDEPATH += ./util
 
 INCLUDEPATH += ./java/include/win32
 INCLUDEPATH += ./clucene

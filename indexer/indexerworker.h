@@ -15,7 +15,7 @@ class indexerWorker : public QObject
 public:
     explicit indexerWorker(QString sDir2Index, logger* pLogger, jvm* pJvm, /*lucyindexer* pLucyIndexer, */QObject *parent = 0);
     ~indexerWorker();
-    void close();
+    void close(bool bDeleteCompleteIndex=false);
     int getNrOfIndexedFiles();
     int getNrOfFilesInIndex();
     int getNrOfFoundFiles();
@@ -44,7 +44,6 @@ protected:
 signals:
     void finished();
     void getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMetas);
-
 
 public slots:
     void doWork();

@@ -25,6 +25,7 @@ public:
     int getHitCount();
     QString GetHitAttr(int iHitNr, QString sAttrName);
     QString GetHitEnv(int iHitNr);
+    void cleanup(bool bConstructor);
 
 protected:
     logger* m_pLog;
@@ -37,8 +38,6 @@ protected:
     ArrayBase<Query*>* m_aquerys;
     BooleanQuery* m_query;
     Hits* m_hits;
-
-    void cleanup(bool bConstructor);
 
 signals:
 

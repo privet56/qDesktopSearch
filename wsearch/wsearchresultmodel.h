@@ -23,7 +23,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
     virtual QModelIndex buddy(const QModelIndex &index) const;
-
+    void reset();
 
 protected:
     searcher* m_pSearcher;

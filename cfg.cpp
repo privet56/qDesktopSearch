@@ -24,7 +24,8 @@ QString cfg::getValue(QString sCfgEntryName)
 }
 void cfg::setValue(QString sCfgEntryName, QString sCfgEntryValue)
 {
-    return this->m_pSettings->setValue(sCfgEntryName, sCfgEntryValue);
+    this->m_pSettings->setValue(sCfgEntryName, sCfgEntryValue);
+    emit cfgChanged(sCfgEntryName, sCfgEntryValue);
 }
 QString cfg::replacePlaceHolders(QString s)
 {

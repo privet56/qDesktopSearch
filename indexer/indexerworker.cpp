@@ -45,7 +45,13 @@ void indexerWorker::doWork()
 
         m_iIndexingTime = t.elapsed();
         m_pLogger->inf("an indexer thread finished. found#:"+QString::number(getNrOfFoundFiles())+" indexed#:"+QString::number(getNrOfIndexedFiles())+" NrOfFilesInIdx:"+QString::number(getNrOfFilesInIndex())+" deleteds:"+QString::number(iDeletedFiles)+" time:"+logger::t_elapsed(getIndexTime())+"  dir:"+getIndexedDir());
-        //QThread::msleep(99999/*milliseconds*/);   //how to handle isInterruptionRequested?
+
+        for(int i=0;i<99;i++)
+        {
+            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
+            QThread::msleep(2999/*milliseconds*/);
+        }
+
         t.restart();
     }
 
@@ -199,10 +205,11 @@ bool indexerWorker::openIndex()
     }
     return true;
 }
-void indexerWorker::close()
+void indexerWorker::close(bool bDeleteCompleteIndex/*=false*/)
 {
     if(m_pLucyIndexer)
     {
+        m_pLucyIndexer->close(bDeleteCompleteIndex);
         delete m_pLucyIndexer;
     }
     m_pLucyIndexer = nullptr;

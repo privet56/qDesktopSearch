@@ -13,7 +13,7 @@ class indexerThread : public QThread
 public:
 
     explicit indexerThread(indexerWorker* pWorker, logger* pLogger, jvm* pJvm, QObject *parent = 0);
-    void close();
+    void close(bool bDeleteCompleteIndex=false);
     indexerWorker* getWorker();
     ~indexerThread();
 

@@ -20,6 +20,10 @@ MainWindow::MainWindow(QSplashScreen* pSplash, logger* pLog, indexer* pIndexer, 
     this->m_pLog->inf("App Startup Finished");
 
     m_pIndexer->init();
+
+    //TODO: minimize toolbar+menu
+    //TODO: about toolbar+menu
+    //TODO: tray icon(menu: min/max/quit)
 }
 
 MainWindow::~MainWindow()

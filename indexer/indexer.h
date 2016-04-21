@@ -16,6 +16,7 @@ public:
     QMap<QString, indexerThread*>* getIndexers();
     void add(QString sDir2Index);
     bool isIndexing(QString sDir2Index);
+    void removeIndex(QString sDir2Index);
     void stopAll();
     bool isStoppedAll();
     void init();
@@ -23,7 +24,6 @@ public:
 protected:
     QMap<QString, indexerThread*> m_pWorkers;
     logger* m_pLogger;
-    //lucyindexer* m_pLucyIndexer;
     jvm* m_pJvm;
 
 signals:
