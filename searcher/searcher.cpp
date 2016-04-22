@@ -1,4 +1,5 @@
 #include "searcher.h"
+#include "f.h"
 #include "lucysearcher.h"
 #include "seacherHighlightFormatter.h"
 
@@ -11,6 +12,7 @@ searcher::searcher(QObject *parent) : QObject(parent),
     m_query(nullptr),
     m_sort(nullptr),
     m_tophits(nullptr),
+    m_query4highlight(nullptr),
     m_hits(nullptr)
 {
     cleanup(true);
@@ -35,8 +37,6 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
 
         lucysearcher* pLucySearcher = new lucysearcher(this->m_pLog);
 
-        //indexerThread* indexerThread = i.value();
-        //pLucySearcher->open(indexerThread->getWorker()->getIndexer()->getDirectory());
         QString sDir2Index(i.key());
         pLucySearcher->open(sDir2Index);    //crash at the second search
 
@@ -50,6 +50,7 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
 
     m_aquerys   = _CLNEW CL_NS(util)::ObjectArray<Query>(lpSearchinputs.length());
     m_query     = _CLNEW BooleanQuery();
+    m_query4highlight = _CLNEW BooleanQuery();
 
 //TODO: does * work?
     for(int i=0;i<lpSearchinputs.length();i++)
@@ -58,6 +59,10 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
         QString sSearchString = pSearchInput.first;
         QString sSearchField  = pSearchInput.second;
         m_query->add(QueryParser::parse(sSearchString.toStdWString().c_str(), sSearchField.toStdWString().c_str(), lucy::getNewAnalyzer()), true/*handle delete*/, BooleanClause::SHOULD);
+        {
+            sSearchString = sSearchString.replace("*", ""); //TODO: fix highlighter instead of modifying the query
+            m_query4highlight->add(QueryParser::parse(sSearchString.toStdWString().c_str(), sSearchField.toStdWString().c_str(), lucy::getNewAnalyzer()), true/*handle delete*/, BooleanClause::SHOULD);
+        }
     }
 
     m_sort = _CLNEW Sort(SortField::FIELD_SCORE()/*=? RELEVANCE*/);
@@ -67,7 +72,7 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
 
     size_t iHits = (m_hits == nullptr ? 0 : m_hits->length());
 
-    this->m_pLog->inf("hits:"+QString::number(iHits)+" query:"+QString::fromStdWString(m_query->toString(_T("text"))));
+    this->m_pLog->inf("hits:"+QString::number(iHits)+" query:"+QString::fromStdWString(m_query->toString(_T("dummyvalue"))));
 
     return (int)iHits;
 }
@@ -92,7 +97,18 @@ QMap<QString, QString> searcher::GetHitAttrs(int iHitNr)
         QString sFieldName = QString::fromStdWString(field->name());
         QString sFieldValue= QString::fromStdWString(field->stringValue());
 
-        //lastmodified, size
+        sFieldValue = sFieldValue.replace('\n', ' ').replace('\t', ' ').replace("  ", " ");
+        if(sFieldName == "lastmodified")
+        {
+            int iDate = sFieldValue.toInt();
+            QDateTime t = QDateTime::fromTime_t(iDate);
+            sFieldValue = t.toString("yyyy; MMMM; dd - hh:mm:ss.zzz");
+        }
+        else if(sFieldName == "size")
+        {
+            int iSize = sFieldValue.toInt();
+            sFieldValue = f::fileSizeAsString(iSize)+" ("+QString::number(iSize)+" bytes)";
+        }
 
         if (mAttrs.contains(sFieldName))
             mAttrs[sFieldName] = mAttrs[sFieldName] + ", " + sFieldValue;
@@ -124,7 +140,7 @@ QString searcher::GetHitEnv(int iHitNr)
 {
     if(!m_hits)return "";
 
-    QueryScorer scorer(m_query);
+    QueryScorer scorer(m_query4highlight);
     seacherHighlightFormatter hl_formatter;
     seacherHighlightFormatter* pHLFormatter = &hl_formatter;
     Formatter* pFormatter = pHLFormatter;
@@ -178,6 +194,11 @@ void searcher::cleanup(bool bConstructor)
     {
         delete m_query;
         m_query = nullptr;
+    }
+    if(m_query4highlight)
+    {
+        delete m_query4highlight;
+        m_query4highlight = nullptr;
     }
     if(m_hits)
     {

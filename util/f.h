@@ -16,6 +16,7 @@ public:
     explicit f(QObject *parent = 0);
 
     static bool emptydir(QString sDir, logger* pLog);
+    static QString fileSizeAsString(qint64 size);
 
 signals:
 

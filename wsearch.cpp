@@ -73,6 +73,7 @@ void wSearch::on_tableView_customContextMenuRequested(const QPoint &pos)
 {
     QPoint globalPos = qobject_cast<QWidget*>(sender())->mapToGlobal(pos);
     globalPos.setY(globalPos.y() + 25);
+    globalPos.setX(globalPos.x() + 25);
 
     QMenu menu;
     QIcon iInfo(":/res/information.png");

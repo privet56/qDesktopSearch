@@ -34,3 +34,25 @@ bool f::emptydir(QString sDir, logger* pLog)
     }
     return true;
 }
+
+QString f::fileSizeAsString(qint64 size)
+{
+    QString unit;
+    double newSize;
+
+    if (size < 1024) {
+        newSize = size;
+        unit = tr("bytes");
+    } else if (size < 1024 * 1024) {
+        newSize = (double)size / (double)1024;
+        unit = tr("kB");
+    } else if (size < 1024 * 1024 * 1024) {
+        newSize = (double)size / (double)(1024 * 1024);
+        unit = tr("MB");
+    } else {
+        newSize = (double)size / (double)(1024 * 1024 * 1024);
+        unit = tr("GB");
+    }
+
+    return QString(QLatin1String("%1 %2")).arg(newSize, 0, 'f', 1).arg(unit);
+}

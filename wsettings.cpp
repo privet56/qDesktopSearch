@@ -1,5 +1,6 @@
 #include <QStringList>
 #include <QFileDialog>
+#include <QMessageBox>
 #include "wsettings.h"
 #include "ui_wsettings.h"
 #include "wsettingdirs2indexmodel.h"
@@ -97,5 +98,5 @@ void wSettings::refreshtableViewDirs(int iCfgEntriesLen)
 
 void wSettings::on_toolButtonInfo_clicked()
 {
-
+    QMessageBox::information(this, "Warning", "Not yet implemented", QMessageBox::Ok);
 }
