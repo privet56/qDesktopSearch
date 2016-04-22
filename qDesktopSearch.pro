@@ -52,7 +52,9 @@ SOURCES += main.cpp \
     searcher/wsearchitemdelegate.cpp \
     wsettings/wsettingdirs2indexmodel.cpp \
     util/f.cpp \
-    wsearch/wfieldsmodel.cpp
+    wsearch/wfieldsmodel.cpp \
+    wsettings/tray.cpp \
+    util/balloon.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -78,7 +80,9 @@ HEADERS  += mainwindow.h \
     searcher/wsearchitemdelegate.h \
     wsettings/wsettingdirs2indexmodel.h \
     util/f.h \
-    wsearch/wfieldsmodel.h
+    wsearch/wfieldsmodel.h \
+    wsettings/tray.h \
+    util/balloon.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \

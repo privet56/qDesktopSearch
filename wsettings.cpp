@@ -4,6 +4,9 @@
 #include "wsettings.h"
 #include "ui_wsettings.h"
 #include "wsettingdirs2indexmodel.h"
+#include "balloon.h"
+#include "tray.h"
+#include <QTimer>
 
 wSettings::wSettings(QWidget *parent) :
     QFrame(parent),
@@ -15,6 +18,8 @@ wSettings::wSettings(QWidget *parent) :
     ui->frameSave->setVisible(false);
     this->ui->toolButtonDel->setEnabled(false);
     this->ui->toolButtonInfo->setEnabled(false);
+
+    QTimer::singleShot(1999/*msec = 2 secs*/, this, SLOT(on_init()));
 }
 
 wSettings::~wSettings()
@@ -99,4 +104,13 @@ void wSettings::refreshtableViewDirs(int iCfgEntriesLen)
 void wSettings::on_toolButtonInfo_clicked()
 {
     QMessageBox::information(this, "Warning", "Not yet implemented", QMessageBox::Ok);
+}
+
+void wSettings::on_init()
+{
+    int iDirCount = this->ui->tableViewDirs->model()->rowCount();
+    if (iDirCount < 1)
+        tray::getTrayIcon()->showMessage("Hint", "You have no directories in the Settings pane configured to be indexed.", QSystemTrayIcon::Information, 2000);
+    else
+        tray::getTrayIcon()->showMessage("Hint", "Starting indexing "+QString::number(iDirCount)+" directories...", QSystemTrayIcon::Information, 2000);
 }
