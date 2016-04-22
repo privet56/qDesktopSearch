@@ -329,6 +329,17 @@
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="toolButtonInfo">
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="res.qrc">
+             <normaloff>:/res/dialog-information.png</normaloff>:/res/dialog-information.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>

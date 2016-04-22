@@ -27,6 +27,7 @@ public:
     virtual QModelIndex buddy(const QModelIndex &index) const;
     virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
     void reset();
+    searcher* getSearcher();
 
     static const int COL_FILENAME  = 0;
     static const int COL_HITENV    = 1;

@@ -158,6 +158,7 @@ jobject jvm::getObject(QString sClassAbsName, QString sStringConstructorParamete
     if(!init)return (jobject)this->m_pLogger->err("cannot load class9<init> "+sClassAbsName+"    param:"+sStringConstructorParameter);
     jstring js = m_pEnv->NewStringUTF(sStringConstructorParameter.toLatin1().data());
     jobject o = sStringConstructorParameter.isNull() ? m_pEnv->NewObject(c, init) : m_pEnv->NewObject(c, init, js);
+    m_pEnv->DeleteLocalRef(js);
     if(!o)return (jobject)this->m_pLogger->err("cannot load class10<init>.NewObject "+sClassAbsName);
     return o;
 }
@@ -179,6 +180,7 @@ void jvm::extractMetaContents(jobject oMetadata, jclass cMetadata, jstring metaN
     {
         jstring element = (jstring)m_pEnv->GetObjectArrayElement(array, index);
         QString sMetaValue(js2qs(element));
+        m_pEnv->DeleteLocalRef(element);
         sl << sMetaValue;
     }
 
@@ -259,7 +261,7 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
 //get objects
     jobject oFile               = getObject("java.io.File", sAbsPathName);
     jobject oFileInputStream    = getObject("java.io.FileInputStream", oFile, "java.io.File", false);
-    if(!oFileInputStream)   //almost normal case...
+    if(!oFileInputStream)       //almost normal case, if file is exclusively opened by another process...
     {
         m_pEnv->DeleteLocalRef(oFile);
         this->m_pLogger->wrn("cannot load file{"+sAbsPathName+"}");return;
@@ -295,6 +297,7 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
         }
         jstring js = (jstring)m_pEnv->CallObjectMethod(oBodyContentHandler, toString);
         QString sText(js2qs(js));
+        m_pEnv->DeleteLocalRef(js);
         QStringList sl;
         sl << sText;
         pMetas->operator []("text") = sl;
@@ -313,6 +316,7 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
             jstring element = (jstring) m_pEnv->GetObjectArrayElement(array, index);
             QString sMetaName(js2qs(element));
             extractMetaContents(oMetadata, cMetadata, element, pMetas, sMetaName);
+            m_pEnv->DeleteLocalRef(element);
         }
 
         m_pEnv->DeleteLocalRef(array);

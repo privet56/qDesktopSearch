@@ -204,3 +204,8 @@ void wsearchresultModel::reset()
     if (this->m_pSearcher)
         this->m_pSearcher->cleanup(false);
 }
+
+searcher* wsearchresultModel::getSearcher()
+{
+    return this->m_pSearcher;
+}

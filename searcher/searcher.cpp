@@ -51,6 +51,7 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
     m_aquerys   = _CLNEW CL_NS(util)::ObjectArray<Query>(lpSearchinputs.length());
     m_query     = _CLNEW BooleanQuery();
 
+//TODO: does * work?
     for(int i=0;i<lpSearchinputs.length();i++)
     {
         QPair<QString, QString> pSearchInput = lpSearchinputs.at(i);
@@ -78,11 +79,37 @@ int searcher::getHitCount()
     return iHits;
 }
 
+QMap<QString, QString> searcher::GetHitAttrs(int iHitNr)
+{
+    QMap<QString, QString> mAttrs;
+    Document* d = &(m_hits->doc(iHitNr));
+    if(!d)return mAttrs;
+    const Document::FieldsType* fields = d->getFields();
+    Document::FieldsType::const_iterator fieldIt = fields->begin();
+    while(fieldIt != fields->end())
+    {
+        Field* field = *fieldIt;
+        QString sFieldName = QString::fromStdWString(field->name());
+        QString sFieldValue= QString::fromStdWString(field->stringValue());
+
+        //lastmodified, size
+
+        if (mAttrs.contains(sFieldName))
+            mAttrs[sFieldName] = mAttrs[sFieldName] + ", " + sFieldValue;
+        else
+            mAttrs[sFieldName] = sFieldValue;
+
+        fieldIt++;
+    }
+    return mAttrs;
+}
+
 QString searcher::GetHitAttr(int iHitNr, QString sAttrName)
 {
     if(!m_hits)return "";
 
     Document* d = &(m_hits->doc(iHitNr));
+    if(!d)return "";
     const TCHAR* pAttrValue = d->get(sAttrName.toStdWString().c_str());
 
     if(!pAttrValue)
@@ -227,10 +254,10 @@ QSet<QString> searcher::fields()
     QStringList sl = sDirs2Index.split('|', QString::SkipEmptyParts);
     QSet<QString> sf;
 
-    //loop all
+    //loop all indexes
     for(int i=0;i<sl.length();i++)
     {
-        const char* path = lucy::idxDir4Dir2Index(sl.at(i)).toLatin1().constData();
+        //const char* path = lucy::idxDir4Dir2Index(sl.at(i)).toLatin1().constData();
         IndexReader* reader = IndexReader::open(lucy::idxDir4Dir2Index(sl.at(i)).toLatin1().constData(), true/*closeDirectoryOnCleanup*/, nullptr);
         StringArrayWithDeletor fs(false);
         reader->getFieldNames(IndexReader::ALL, fs);

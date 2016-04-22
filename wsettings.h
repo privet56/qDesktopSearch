@@ -28,6 +28,7 @@ private slots:
     void on_toolButtonAdd_clicked();
     void on_toolButtonDel_clicked();
     void on_tableViewDirs_clicked(const QModelIndex &index);
+    void on_toolButtonInfo_clicked();
 
 private:
     Ui::wSettings *ui;

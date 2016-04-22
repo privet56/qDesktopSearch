@@ -13,6 +13,7 @@ wSettings::wSettings(QWidget *parent) :
     ui->setupUi(this);
     ui->frameSave->setVisible(false);
     this->ui->toolButtonDel->setEnabled(false);
+    this->ui->toolButtonInfo->setEnabled(false);
 }
 
 wSettings::~wSettings()
@@ -63,6 +64,7 @@ void wSettings::on_tableViewDirs_clicked(const QModelIndex &index)
 {
     QModelIndexList sels = this->ui->tableViewDirs->selectionModel()->selectedIndexes();
     this->ui->toolButtonDel->setEnabled(index.isValid() && (sels.size() == 1));
+    this->ui->toolButtonInfo->setEnabled(index.isValid() && (sels.size() == 1));
 }
 void wSettings::setEnv(logger* pLog, indexer* pIndexer)
 {
@@ -74,11 +76,6 @@ void wSettings::setEnv(logger* pLog, indexer* pIndexer)
 }
 void wSettings::refreshtableViewDirs(int iCfgEntriesLen)
 {
-    //TODO: clear search result list
-    {
-
-    }
-
     wsettingdirs2indexModel* pModel = (wsettingdirs2indexModel*)this->ui->tableViewDirs->model();
     wsettingdirs2indexModel* pModel2 = new wsettingdirs2indexModel(nullptr);
     //TODO: do it better (emit dataChanged?)
@@ -89,10 +86,16 @@ void wSettings::refreshtableViewDirs(int iCfgEntriesLen)
 
     {   //handle selection
         this->ui->toolButtonDel->setEnabled(false);
+        this->ui->toolButtonInfo->setEnabled(false);
 
         if(iCfgEntriesLen > 0)
         {
             this->ui->tableViewDirs->selectRow(1);
         }
     }
+}
+
+void wSettings::on_toolButtonInfo_clicked()
+{
+
 }

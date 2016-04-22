@@ -18,5 +18,18 @@
 		<file>res/css.css</file>
 		<file>res/add.png</file>
 		<file>res/remove.png</file>
+		<file>res/dialog-information.png</file>
+		<file>res/information.png</file>
+		<file>res/open.png</file>
+		<file>res/quickopen.png</file>
+		<file>res/reopen.png</file>
+		<file>res/text-x-texinfo.png</file>
+		<file>res/app_window_maximize.png</file>
+		<file>res/app_window_minimize.png</file>
+		<file>res/app_window_restore.png</file>
+		<file>res/expander_ic_maximized.9.png</file>
+		<file>res/expander_ic_minimized.9.png</file>
+		<file>res/minus-sign.png</file>
+		<file>res/restorenormalscreen.png</file>
     </qresource>
 </RCC>

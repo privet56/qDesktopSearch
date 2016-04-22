@@ -25,6 +25,7 @@ public:
 
     int getHitCount();
     QString GetHitAttr(int iHitNr, QString sAttrName);
+    QMap<QString, QString> GetHitAttrs(int iHitNr);
     QString GetHitEnv(int iHitNr);
     void cleanup(bool bConstructor);
     void sortBy(QString sSortFieldName, Qt::SortOrder order);

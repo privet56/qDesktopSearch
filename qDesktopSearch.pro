@@ -51,7 +51,8 @@ SOURCES += main.cpp \
     searcher/seacherHighlightFormatter.cpp \
     searcher/wsearchitemdelegate.cpp \
     wsettings/wsettingdirs2indexmodel.cpp \
-    util/f.cpp
+    util/f.cpp \
+    wsearch/wfieldsmodel.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -76,7 +77,8 @@ HEADERS  += mainwindow.h \
     globalinclude.h \
     searcher/wsearchitemdelegate.h \
     wsettings/wsettingdirs2indexmodel.h \
-    util/f.h
+    util/f.h \
+    wsearch/wfieldsmodel.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \
