@@ -84,6 +84,10 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
     {
         i.next();
         QString sMetaName(i.key());
+        if(sMetaName == "x-parsed-by")
+            continue;
+        sMetaName = metaName(sMetaName);
+
         QStringList sMetaValues = i.value();
         for(int iMetaValue = 0; iMetaValue < sMetaValues.size(); ++iMetaValue)
         {
@@ -113,6 +117,13 @@ void lucyindexer::onIndexerThreadFinished()
         m_pIndexWriter->flush();
         m_pIndexWriter->optimize();
     }
+}
+QString lucyindexer::metaName(QString sRawMetaName)
+{
+    sRawMetaName = sRawMetaName.toLower().trimmed();
+    sRawMetaName = sRawMetaName.replace("dc:","");
+    sRawMetaName = sRawMetaName.replace(QRegExp("[^a-z0-9\\-]"), "_");
+    return sRawMetaName;
 }
 
 int lucyindexer::getNrOfIndexedFiles()

@@ -26,6 +26,8 @@ public:
     QString getIdFNandDATE(QString sAbsPathName, QFileInfo finfo);
     IndexModifier* getIndexer();
 
+    QString metaName(QString sRawMetaName);
+
 protected:
     //IndexWriter* m_pIndexWriter;
     IndexModifier* m_pIndexWriter;

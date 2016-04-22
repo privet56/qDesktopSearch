@@ -39,6 +39,8 @@ void indexer::add(QString sDir2Index)
     sDir2Index = str::normalizePath(sDir2Index, false);
     if(this->isIndexing(sDir2Index))return;
 
+    //QThread::msleep(999/*milliseconds*/);
+
     indexerWorker* pWorker = new indexerWorker(sDir2Index, m_pLogger, m_pJvm/*, m_pLucyIndexer*/);
     pWorker->openIndex();
     indexerThread* pThread = new indexerThread(pWorker, m_pLogger, m_pJvm);

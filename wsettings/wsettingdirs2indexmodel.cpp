@@ -145,7 +145,7 @@ bool wsettingdirs2indexModel::setData(const QModelIndex &index, const QVariant &
 }
 void wsettingdirs2indexModel::setEnv(logger* pLog)
 {
-    this->m_pLog        = pLog;
+    this->m_pLog = pLog;
 }
 
 QModelIndex wsettingdirs2indexModel::buddy(const QModelIndex &index) const

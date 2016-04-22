@@ -5,6 +5,7 @@
 #include <QPair>
 #include <QVector>
 #include <QList>
+#include <QSet>
 #include "logger.h"
 #include "seacherHighlightFormatter.h"
 #include "indexer.h"
@@ -27,6 +28,7 @@ public:
     QString GetHitEnv(int iHitNr);
     void cleanup(bool bConstructor);
     void sortBy(QString sSortFieldName, Qt::SortOrder order);
+    QSet<QString> fields();
 
 protected:
     logger* m_pLog;
@@ -39,6 +41,7 @@ protected:
     ArrayBase<Query*>* m_aquerys;
     BooleanQuery* m_query;
     Hits* m_hits;
+    TopFieldDocs* m_tophits;
     Sort* m_sort;
 
 signals:

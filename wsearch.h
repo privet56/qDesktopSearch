@@ -2,6 +2,7 @@
 #define WSEARCH_H
 
 #include <QFrame>
+#include "searcher.h"
 #include "logger.h"
 #include "indexer.h"
 
@@ -21,6 +22,7 @@ public:
 protected:
     logger* m_pLog;
     indexer* m_pIndexer;
+    searcher* m_pSearcher;
 
 private slots:
     void on_eSearchTerm_textChanged(const QString &arg1);
@@ -29,6 +31,7 @@ private slots:
     void on_tableView_doubleClicked(const QModelIndex &index);
     void on_tableView_customContextMenuRequested(const QPoint &pos);
     void OnCfgChanged(QString sCfgEntryName, QString sCfgEntryValue);
+    void fillFields();
 
 private:
     Ui::wSearch *ui;

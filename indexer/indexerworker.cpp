@@ -61,7 +61,8 @@ void indexerWorker::doWork()
 void indexerWorker::dir(QString sDir)
 {
     //is recursive!
-    QDirIterator it(sDir+(sDir.endsWith(QDir::separator()) ? QString("") : QDir::separator()), QStringList() << "*", QDir::Files | QDir::Dirs | QDir::NoDotDot | QDir::NoDot, QDirIterator::Subdirectories);
+    QString sSuffix = (sDir.endsWith(QDir::separator()) || sDir.endsWith('/')) ? QString("") : QDir::separator();
+    QDirIterator it(sDir+sSuffix, QStringList() << "*", QDir::Files | QDir::Dirs | QDir::NoDotDot | QDir::NoDot, QDirIterator::Subdirectories);
     bool bFound=false;
     while (it.hasNext())
     {

@@ -22,6 +22,7 @@ bool jvm::load()
     JavaVMInitArgs vm_args;
     JavaVMOption options[OPTIONSLEN];
 
+    //TODO: better list all jars in a dir and set all as class.path
     QString sTika(this->m_pLogger->GetCfg()->getValue("tika"));
     if(!QFile::exists(sTika))
         return this->m_pLogger->err("fnf "+sTika);
@@ -31,7 +32,7 @@ bool jvm::load()
     char* pJavaClassPath = (char*)strdup(ba.constData());       //TODO: cleanup
     options[0].optionString = (char*)pJavaClassPath;
     options[1].optionString = (char*)"-Dworkdir=.";
-    options[2].optionString = (char*)"-Xms2048m";
+    options[2].optionString = (char*)"-Xms2048m";               //TODO: make it dynamic
     options[3].optionString = (char*)"-Xmx2048m";
 
     QString sJvmDll(qApp->applicationDirPath() + "/jre/bin/server/jvm.dll");    //TODO: .so for !win
@@ -112,11 +113,14 @@ jclass jvm::getClass(QString sClassAbsName)
         jclass2load = m_pEnv->FindClass(args2);
         delete[] args;args = nullptr;
         delete[] args2;args2 = nullptr;
-        //return (jclass)this->m_pLogger->err("cannot load class >"+QString(args)+"<");
+        //return (jclass)this->m_pLogger->err("cannot load class0 >"+QString(args)+"<");
         */
         jclass2load = m_pEnv->FindClass(sClassAbsNameWithSlash.toLatin1().data());
         if(!jclass2load)
-            return (jclass)this->m_pLogger->err("cannot load class "+sClassAbsNameWithSlash);
+            return (jclass)this->m_pLogger->err("cannot load class1 "+sClassAbsNameWithSlash);
+
+        //jclass2load = (jclass)m_pEnv->NewGlobalRef(jclass2load);  //does not help
+
         m_classes[sClassAbsName]            = jclass2load;
         m_classes[sClassAbsNameWithDots]    = jclass2load;
         m_classes[sClassAbsNameWithSlash]   = jclass2load;
@@ -128,33 +132,33 @@ jobject jvm::getObject(QString sClassAbsName, jobject constrParam, QString sCons
     sConstrParamClassName.replace('.','/');
 
     jclass c = this->getClass(sClassAbsName);
-    if(!c)return (jobject)this->m_pLogger->err("cannot load class "+sClassAbsName);
+    if(!c)return (jobject)this->m_pLogger->err("cannot load class2 "+sClassAbsName);
     jmethodID init = m_pEnv->GetMethodID(c, "<init>", QString("(L"+sConstrParamClassName+";)V").toLatin1().data());
-    if(!init)return (jobject)this->m_pLogger->err("cannot load class<init> "+sClassAbsName+"    param:"+sConstrParamClassName);
+    if(!init)return (jobject)this->m_pLogger->err("cannot load class3<init> "+sClassAbsName+"    param:"+sConstrParamClassName);
     jobject o = m_pEnv->NewObject(c, init, constrParam);
-    if(!o && bErrIfCannotInit)return (jobject)this->m_pLogger->err("cannot load class<init>.NewObject "+sClassAbsName+"("+sConstrParamClassName+")");
+    if(!o && bErrIfCannotInit)return (jobject)this->m_pLogger->err("cannot load class4<init>.NewObject "+sClassAbsName+"("+sConstrParamClassName+")");
     return o;
 }
 jobject jvm::getObject(QString sClassAbsName)
 {
     jclass c = this->getClass(sClassAbsName);
-    if(!c)return (jobject)this->m_pLogger->err("cannot load class "+sClassAbsName);
+    if(!c)return (jobject)this->m_pLogger->err("cannot load class5 "+sClassAbsName);
     jmethodID init = m_pEnv->GetMethodID(c, "<init>", "()V");
-    if(!init)return (jobject)this->m_pLogger->err("cannot load class<init> "+sClassAbsName);
+    if(!init)return (jobject)this->m_pLogger->err("cannot load class6<init> "+sClassAbsName);
     jobject o = m_pEnv->NewObject(c, init);
-    if(!o)return (jobject)this->m_pLogger->err("cannot load class<init>.NewObject "+sClassAbsName);
+    if(!o)return (jobject)this->m_pLogger->err("cannot load class7<init>.NewObject "+sClassAbsName);
     return o;
 }
 
 jobject jvm::getObject(QString sClassAbsName, QString sStringConstructorParameter)
 {
     jclass c = this->getClass(sClassAbsName);
-    if(!c)return (jobject)this->m_pLogger->err("cannot load class "+sClassAbsName);
+    if(!c)return (jobject)this->m_pLogger->err("cannot load class8 "+sClassAbsName);
     jmethodID init = m_pEnv->GetMethodID(c, "<init>", "(Ljava/lang/String;)V");
-    if(!init)return (jobject)this->m_pLogger->err("cannot load class<init> "+sClassAbsName+"    param:"+sStringConstructorParameter);
+    if(!init)return (jobject)this->m_pLogger->err("cannot load class9<init> "+sClassAbsName+"    param:"+sStringConstructorParameter);
     jstring js = m_pEnv->NewStringUTF(sStringConstructorParameter.toLatin1().data());
     jobject o = sStringConstructorParameter.isNull() ? m_pEnv->NewObject(c, init) : m_pEnv->NewObject(c, init, js);
-    if(!o)return (jobject)this->m_pLogger->err("cannot load class<init>.NewObject "+sClassAbsName);
+    if(!o)return (jobject)this->m_pLogger->err("cannot load class10<init>.NewObject "+sClassAbsName);
     return o;
 }
 

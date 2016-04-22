@@ -10,6 +10,7 @@ searcher::searcher(QObject *parent) : QObject(parent),
     m_searchables(nullptr),
     m_query(nullptr),
     m_sort(nullptr),
+    m_tophits(nullptr),
     m_hits(nullptr)
 {
     cleanup(true);
@@ -59,17 +60,20 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
     }
 
     m_sort = _CLNEW Sort(SortField::FIELD_SCORE()/*=? RELEVANCE*/);
-    m_hits = m_pMultiSearcher->search(m_query, m_sort);
+    //TODO: set max hits
+    //m_tophits = m_pMultiSearcher->_search(m_query, nullptr/*filter*/, 999/*max docs*/, m_sort);
+    m_hits = m_pMultiSearcher->search(m_query, nullptr/*filter*/, m_sort);
 
-    int iHits = (int)(m_hits == nullptr ? 0 : m_hits->length());
+    size_t iHits = (m_hits == nullptr ? 0 : m_hits->length());
 
     this->m_pLog->inf("hits:"+QString::number(iHits)+" query:"+QString::fromStdWString(m_query->toString(_T("text"))));
 
-    return iHits;
+    return (int)iHits;
 }
 
 int searcher::getHitCount()
 {
+    //m_tophits->length();
     int iHits = (int)(m_hits == nullptr ? 0 : m_hits->length());
     return iHits;
 }
@@ -153,6 +157,11 @@ void searcher::cleanup(bool bConstructor)
         delete m_hits;
         m_hits = nullptr;
     }
+    if(m_tophits)
+    {
+        delete m_tophits;
+        m_tophits = nullptr;
+    }
     if(m_sort)
     {
         _CLDELETE(m_sort);
@@ -194,6 +203,11 @@ void searcher::sortBy(QString sSortFieldName, Qt::SortOrder order)
         delete m_hits;
         m_hits = nullptr;
     }
+    if(m_tophits)
+    {
+        delete m_tophits;
+        m_tophits = nullptr;
+    }
     if(m_sort)
     {
         _CLDELETE(m_sort);
@@ -205,4 +219,32 @@ void searcher::sortBy(QString sSortFieldName, Qt::SortOrder order)
     //TODO: sort case insensitive (eg. with comparator)
     m_sort = _CLNEW Sort(new SortField(sSortFieldName.toStdWString().c_str(), SortField::STRING, bReverse));
     m_hits = m_pMultiSearcher->search(m_query, m_sort);
+}
+
+QSet<QString> searcher::fields()
+{
+    QString sDirs2Index(this->m_pLog->GetCfg()->getValue(DIRS2INDEX));
+    QStringList sl = sDirs2Index.split('|', QString::SkipEmptyParts);
+    QSet<QString> sf;
+
+    //loop all
+    for(int i=0;i<sl.length();i++)
+    {
+        const char* path = lucy::idxDir4Dir2Index(sl.at(i)).toLatin1().constData();
+        IndexReader* reader = IndexReader::open(lucy::idxDir4Dir2Index(sl.at(i)).toLatin1().constData(), true/*closeDirectoryOnCleanup*/, nullptr);
+        StringArrayWithDeletor fs(false);
+        reader->getFieldNames(IndexReader::ALL, fs);
+        size_t fsSize = fs.size();
+        for (int n=0;n<fsSize;n++ )
+        {
+            QString sFieldName = QString::fromStdWString(fs[n]);
+            sf.insert(sFieldName);
+        }
+        fs.clear();
+        reader->close();
+        _CLLDELETE(reader);
+    }
+    sf.insert("text");
+
+    return sf;
 }

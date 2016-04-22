@@ -25,7 +25,7 @@ void lucysearcher::open(QString sDir2Index)
 {
     lucy::open(sDir2Index);
 
-    m_pIndexSearcher = new lucene::search::IndexSearcher(this->m_pDirectory);
+    open(this->m_pDirectory);
 }
 
 IndexSearcher* lucysearcher::getSearcher()

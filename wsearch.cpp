@@ -5,6 +5,7 @@
 #include "ui_wsearch.h"
 #include "wsearchresultmodel.h"
 #include <QPair>
+#include <QTimer>
 #include <QList>
 #include "wsearchitemdelegate.h"
 
@@ -12,17 +13,20 @@ wSearch::wSearch(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::wSearch),
     m_pIndexer(nullptr),
-    m_pLog(nullptr)
+    m_pLog(nullptr),
+    m_pSearcher(new searcher())
 {
     ui->setupUi(this);
 
     {
-        wsearchresultModel* pWsearchresultModel = new wsearchresultModel(new searcher(), this->ui->tableView);
+        wsearchresultModel* pWsearchresultModel = new wsearchresultModel(m_pSearcher, this->ui->tableView);
         this->ui->tableView->setModel(pWsearchresultModel);
         this->ui->tableView->setItemDelegate(new wsearchitemdelegate(this->ui->tableView));
     }
 
     on_eSearchTerm_textChanged("");
+
+    QTimer::singleShot(4999/*msec = 5 secs*/, this, SLOT(fillFields()));
 
     //TODO: fill(+update later) field dropdown(with multiple selection?)
 }
@@ -99,4 +103,12 @@ void wSearch::OnCfgChanged(QString sCfgEntryName, QString sCfgEntryValue)
     this->ui->lHitCount->setText("-");
 
     this->m_pLog->inf("result list resetted because of indexer changes");
+}
+
+void wSearch::fillFields()
+{
+    QSet<QString> slFields = m_pSearcher->fields();
+    QList<QString> list = slFields.toList();
+    qSort(list);
+    //TODO: fill cb!
 }
