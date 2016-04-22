@@ -2,6 +2,7 @@
 #define TRAY_H
 
 #include <QObject>
+#include <QAction>
 #include <QSystemTrayIcon>
 
 class QBalloonTip;
@@ -11,14 +12,19 @@ class tray : public QSystemTrayIcon
     Q_OBJECT
 
 public:
-    explicit tray(QObject *parent = 0);
-    explicit tray(const QIcon &icon, QObject *parent = Q_NULLPTR);
+    explicit tray(QObject *parent);
+    explicit tray(const QIcon &icon, QObject *parent);
+    void setup();
 
     static tray* getTrayIcon();
+
+protected:
+    QAction* m_paHideorShow;
 
 signals:
 
 public slots:
+    void hide_show();
 };
 
 #endif // TRAY_H

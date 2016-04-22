@@ -10,7 +10,7 @@ MainWindow::MainWindow(QSplashScreen* pSplash, logger* pLog, indexer* pIndexer, 
 {
     ui->setupUi(this);
 
-    ui->scrollAreaWidgetContents->setEnv(this->m_pLog, this->m_pIndexer);
+    ui->scrollAreaWidgetContents->setEnv(  this->m_pLog, this->m_pIndexer);
     ui->scrollAreaWidgetContents_2->setEnv(this->m_pLog, this->m_pIndexer);
 
     this->ui->eLog->SetStatusBar(this->statusBar());
@@ -34,4 +34,9 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionExit_triggered()
 {
     this->close();
+}
+
+void MainWindow::on_actionMinimize_triggered()
+{
+
 }

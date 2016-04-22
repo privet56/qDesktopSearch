@@ -110,7 +110,7 @@ void wSettings::on_init()
 {
     int iDirCount = this->ui->tableViewDirs->model()->rowCount();
     if (iDirCount < 1)
-        tray::getTrayIcon()->showMessage("Hint", "You have no directories in the Settings pane configured to be indexed.", QSystemTrayIcon::Information, 2000);
+        tray::getTrayIcon()->showMessage("Hint", "You have no directories in the Settings pane configured to be indexed.    ", QSystemTrayIcon::Information, 1000);
     else
-        tray::getTrayIcon()->showMessage("Hint", "Starting indexing "+QString::number(iDirCount)+" directories...", QSystemTrayIcon::Information, 2000);
+        tray::getTrayIcon()->showMessage("Hint", "Starting indexing "+QString::number(iDirCount)+" directories...           ", QSystemTrayIcon::Information, 1000);
 }

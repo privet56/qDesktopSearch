@@ -54,8 +54,7 @@ int main(int argc, char *argv[])
 
 //tray
     tray trayIcon(QIcon(":/res/bun.png"), &w);
-    trayIcon.setToolTip("qDestkopSearch");
-    trayIcon.show();
+    trayIcon.setup();
 
     w.show();
     //splash.finish(&w);    //let MainWindow handle it
