@@ -1,6 +1,8 @@
 
-include(qt-solutions/qtsingleapplication/src/qtsingleapplication.pri)
+SOURCES += qt-solutions/qtsingleapplication/src/qtsingleapplication.cpp \
+            qt-solutions/qtsingleapplication/src/qtlocalpeer.cpp
 
-INCLUDEPATH += ./qt-solutions
-INCLUDEPATH += ./qt-solutions/qtsingleapplication
+HEADERS += qt-solutions/qtsingleapplication/src/qtsingleapplication.h \
+        qt-solutions/qtsingleapplication/src/qtlocalpeer.h
+
 INCLUDEPATH += ./qt-solutions/qtsingleapplication/src

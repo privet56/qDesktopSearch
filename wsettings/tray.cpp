@@ -15,7 +15,7 @@ tray::tray(const QIcon &icon, QObject *parent) : QSystemTrayIcon(icon, parent)
 
 void tray::setup()
 {
-    this->setToolTip("qDestkopSearch");
+    this->setToolTip("qDesktopSearch");
     this->show();
 
     QWidget* parentWnd = (QWidget*)parent();
@@ -42,6 +42,17 @@ void tray::hide_show()
 
     m_paHideorShow->setIcon(isVisible ? QIcon(":/res/expander_ic_minimized.9.png") : QIcon(":/res/expander_ic_maximized.9.png"));
     m_paHideorShow->setText(isVisible ? "Minimize to Tray" : "Restore Main Window");
+}
+
+void tray::showIfHidden()
+{
+    QWidget* parentWnd = (QWidget*)parent();
+
+    if(!parentWnd || parentWnd->isVisible())
+    {
+        return;
+    }
+    this->hide_show();
 }
 
 tray* tray::getTrayIcon()

@@ -25,6 +25,7 @@ signals:
 
 public slots:
     void hide_show();
+    void showIfHidden();
 };
 
 #endif // TRAY_H

@@ -58,17 +58,16 @@ int main(int argc, char *argv[])
 //wnd
     MainWindow w(&splash, &_log, &_indexer);
 
-//tray
-    tray trayIcon(QIcon(":/res/bun.png"), &w);
-    trayIcon.setup();
-
-    w.show();
-
     a.setActivationWindow(&w, true);
     QObject::connect(&a, SIGNAL(messageReceived(const QString&)), &a, SLOT(activateWindow()));
-    //splash.finish(&w);    //let MainWindow handle it
-
     QObject::connect(qApp, SIGNAL(lastWindowClosed()), &_indexer, SLOT(onQuit()));
+
+//tray
+    tray trayIcon(QIcon(":/res/bun.png"), &w);      //TODO: why it is not showing?
+    trayIcon.setup();
+    QObject::connect(&a, SIGNAL(messageReceived(const QString&)), &trayIcon, SLOT(showIfHidden()));
+
+    w.show();
 
     return a.exec();
 }

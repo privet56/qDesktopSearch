@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui network
 #does not work on win
 #QT       += androidextras
 
