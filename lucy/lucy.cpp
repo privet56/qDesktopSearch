@@ -68,8 +68,6 @@ void lucy::open(QString sDir2Index)
             m_pLogger->err("index locked:"+sAbsFNLock);
     }
 
-    //TODO: make it case-insensitive & whitespace sensitive
-
     m_pAnalyzer     = lucy::getNewAnalyzer();
     m_pDirectory    = FSDirectory::getDirectory(sAbsDirIdx.toLatin1());
 }
@@ -87,5 +85,6 @@ void lucy::setDirectory(Directory* pDirectory)
 }
 Analyzer* lucy::getNewAnalyzer()
 {
+    //TODO: handle . as whitespace
     return  new StandardAnalyzer();//WhitespaceAnalyzer|StopAnalyzer|StandardAnalyzer|SimpleAnalyzer
 }

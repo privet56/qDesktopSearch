@@ -102,11 +102,7 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
 
     if((m_iIndexedFiles % 100000) == 0) //TODO: if(win64)->100000 if(win32)->10000
     {
-        QTime t;
-        t.start();
-        m_pIndexWriter->flush();
-        m_pIndexWriter->optimize();
-        this->m_pLogger->wrn("optimized in "+logger::t_elapsed(t.elapsed()));
+        onIndexerThreadFinished();
     }
 }
 
@@ -114,8 +110,11 @@ void lucyindexer::onIndexerThreadFinished()
 {
     if(m_pIndexWriter)
     {
+        QTime t;
+        t.start();
         m_pIndexWriter->flush();
         m_pIndexWriter->optimize();
+        this->m_pLogger->wrn("optimized in "+logger::t_elapsed(t.elapsed())+" "+this->m_sDir2Index);
     }
 }
 QString lucyindexer::metaName(QString sRawMetaName)

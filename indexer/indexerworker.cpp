@@ -19,8 +19,10 @@ void indexerWorker::doWork()
     connect(this,SIGNAL(getMetaContents(QString,QMap<QString, QStringList>*)),this->m_pJvm,SLOT(getMetaContents(QString,QMap<QString, QStringList>*)), Qt::BlockingQueuedConnection);
 
     t.start();
+    int iLoop = 0;
     while(true)
     {
+        iLoop++;
         m_iIndexingTime     = 0;
         m_iFoundFiles       = 0;
         m_iIndexedFiles     = 0;
@@ -32,7 +34,7 @@ void indexerWorker::doWork()
         }
         {   //idx
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
-            dir(m_sDir2Index);
+            dir(m_sDir2Index, iLoop);
         }
         {   //opt
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
@@ -44,7 +46,7 @@ void indexerWorker::doWork()
         }
 
         m_iIndexingTime = t.elapsed();
-        m_pLogger->inf("an indexer thread finished. found#:"+QString::number(getNrOfFoundFiles())+" indexed#:"+QString::number(getNrOfIndexedFiles())+" NrOfFilesInIdx:"+QString::number(getNrOfFilesInIndex())+" deleteds:"+QString::number(iDeletedFiles)+" time:"+logger::t_elapsed(getIndexTime())+"  dir:"+getIndexedDir());
+        m_pLogger->inf("an indexer thread finished. found#:"+QString::number(getNrOfFoundFiles())+" indexed#:"+QString::number(getNrOfIndexedFiles())+" NrOfFilesInIdx:"+QString::number(getNrOfFilesInIndex())+" deleteds:"+QString::number(iDeletedFiles)+" time:"+logger::t_elapsed(getIndexTime())+"  dir:"+getIndexedDir()+" loop:"+QString::number(iLoop));
 
         for(int i=0;i<99;i++)
         {
@@ -58,7 +60,7 @@ void indexerWorker::doWork()
     emit finished();
 }
 
-void indexerWorker::dir(QString sDir)
+void indexerWorker::dir(QString sDir, int iLoop)
 {
     //is recursive!
     QString sSuffix = (sDir.endsWith(QDir::separator()) || sDir.endsWith('/')) ? QString("") : QDir::separator();
@@ -77,7 +79,7 @@ void indexerWorker::dir(QString sDir)
         if(finfo.isFile())
         {
             bFound = true;
-            file(sEntry, finfo);
+            file(sEntry, finfo, iLoop);
         }
     }
     if(!bFound)
@@ -86,17 +88,21 @@ void indexerWorker::dir(QString sDir)
     }
 }
 
-void indexerWorker::file(QString sAbsPathName, QFileInfo finfo)
+void indexerWorker::file(QString sAbsPathName, QFileInfo finfo, int iLoop)
 {
     m_iFoundFiles++;
+    bool bIsBigFile = false;
 
     {   //if(file>xxxMB)->return;  //because the jvm has to work on the ui thread
         qint64 iSizeInBytes = finfo.size();
         qint64 iSizeInMB    = iSizeInBytes / 1048576;          //1 MB = 1024 KB = 1048576 Byte
         if(iSizeInMB > 99)
         {
-            this->m_pLogger->wrn("file too big to be indexed("+QString::number(iSizeInMB)+"MB) fn:"+sAbsPathName);
-            return;
+            if(iLoop < 2)
+            {   //wrn only in the first loop
+                this->m_pLogger->wrn("file too big to be indexed("+QString::number(iSizeInMB)+"MB) fn:"+sAbsPathName);
+            }
+            bIsBigFile = true;
         }
     }
 
@@ -119,7 +125,11 @@ void indexerWorker::file(QString sAbsPathName, QFileInfo finfo)
     //http://stackoverflow.com/questions/19113719/jni-findclass-function-returns-null
     //http://developer.android.com/training/articles/perf-jni.html#faq_FindClass
     //this->m_pJvm->getMetaContents(sAbsPathName, &metaContents);
-    emit getMetaContents(sAbsPathName, pMetaContents);          //needs connect(...Qt::BlockingQueuedConnection);
+    if(!bIsBigFile)
+    {
+        emit getMetaContents(sAbsPathName, pMetaContents);          //needs connect(...Qt::BlockingQueuedConnection);
+    }
+
     enrichMetaContents(sAbsPathName, pMetaContents, finfo);
 
     if(QThread::currentThread()->isInterruptionRequested())

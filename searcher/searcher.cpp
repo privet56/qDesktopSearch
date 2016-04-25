@@ -20,6 +20,9 @@ searcher::searcher(QObject *parent) : QObject(parent),
 
 int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
 {
+    m_lpSearchinputs.clear();
+    m_lpSearchinputs << lpSearchinputs;
+
     cleanup(false);
 
     if(lpSearchinputs.size() < 1)
@@ -136,6 +139,30 @@ QString searcher::GetHitAttr(int iHitNr, QString sAttrName)
     return QString::fromStdWString(pAttrValue);
 }
 
+QString searcher::getHighlightFieldName()
+{
+    QString sFirstFieldName;
+    for(int i=0;i<m_lpSearchinputs.length();i++)
+    {
+        QPair<QString, QString> pSearchInput = m_lpSearchinputs.at(i);
+        /*QString sSearchString = pSearchInput.first;*/
+        QString sSearchField  = pSearchInput.second;
+        if(i==0)
+        {
+            sFirstFieldName = sSearchField;
+        }
+        if(sSearchField == QString::fromStdWString(FIELDNAME_FULLTEXT))
+        {
+            return sSearchField;
+        }
+    }
+    if(str::isempty(sFirstFieldName, true))
+    {
+        return QString::fromStdWString(FIELDNAME_FULLTEXT);
+    }
+    return sFirstFieldName;
+}
+
 QString searcher::GetHitEnv(int iHitNr)
 {
     if(!m_hits)return "";
@@ -147,14 +174,15 @@ QString searcher::GetHitEnv(int iHitNr)
     Highlighter highlighter(pFormatter, &scorer);
     SimpleFragmenter frag(50);
     highlighter.setTextFragmenter(&frag);
+    QString sFieldName2BeHighlighted = getHighlightFieldName();
 
     {
-        const TCHAR* text = m_hits->doc(iHitNr).get(FIELDNAME_FULLTEXT);
+        const TCHAR* text = m_hits->doc(iHitNr).get(sFieldName2BeHighlighted.toStdWString().c_str());
         if(!text)return "";
         int maxNumFragmentsRequired     = 3;
         const TCHAR* fragmentSeparator  = _T("...");
         StringReader reader(text);
-        TokenStream* tokenStream = this->m_lucysearchables.at(0)->getAnalyzer()->tokenStream(FIELDNAME_FULLTEXT, &reader);
+        TokenStream* tokenStream = this->m_lucysearchables.at(0)->getAnalyzer()->tokenStream(sFieldName2BeHighlighted.toStdWString().c_str(), &reader);
         if(!tokenStream)return "";
 
         TCHAR* result =

@@ -28,7 +28,8 @@ DEFINES += MAKE_CLUCENE_SHARED_LIB
 #DEFINES += _MBCS
 #DEFINES += _UNICODE
 
-include(qDesktopSearch_3rdparty.pri)
+include(qDesktopSearch_3rdparty_clucene.pri)
+include(qDesktopSearch_3rdparty_qt-solutions.pri)
 
 SOURCES += main.cpp \
     mainwindow.cpp \

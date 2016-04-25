@@ -39,12 +39,15 @@ protected:
 
     Searchable** m_searchables;
     QList<lucysearcher*> m_lucysearchables;
+    QList<QPair<QString, QString>> m_lpSearchinputs;
     ArrayBase<Query*>* m_aquerys;
     BooleanQuery* m_query;
     BooleanQuery* m_query4highlight;
     Hits* m_hits;
     TopFieldDocs* m_tophits;
     Sort* m_sort;
+
+    QString getHighlightFieldName();
 
 signals:
 

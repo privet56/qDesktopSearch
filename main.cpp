@@ -4,6 +4,8 @@
 #include <QFile>
 #include <QSystemTrayIcon>
 #include <QTextStream>
+#include <qtsingleapplication.h>
+#include "globalinclude.h"
 #include "cfg.h"
 #include "logger.h"
 #include "jvm.h"
@@ -13,10 +15,14 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QtSingleApplication a(argc, argv);
+
+    if (a.sendMessage(SINGLEINSTANCE_QDESKTOPSEARCH_WAKEUP))
+    {
+        return 0;   //another instance notified
+    }
 
     //TODO: start as admin?
-    //TODO: singleInstance!
 
 //splash
     QPixmap pixmap(":/res/bun.png");
@@ -57,6 +63,9 @@ int main(int argc, char *argv[])
     trayIcon.setup();
 
     w.show();
+
+    a.setActivationWindow(&w, true);
+    QObject::connect(&a, SIGNAL(messageReceived(const QString&)), &a, SLOT(activateWindow()));
     //splash.finish(&w);    //let MainWindow handle it
 
     QObject::connect(qApp, SIGNAL(lastWindowClosed()), &_indexer, SLOT(onQuit()));

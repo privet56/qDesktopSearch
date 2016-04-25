@@ -34,8 +34,8 @@ protected:
     int m_iIndexedFiles;
     int m_iIndexingTime;
 
-    void dir(QString sDir);
-    void file(QString sAbsPathName, QFileInfo finfo);
+    void dir(QString sDir, int iLoop);
+    void file(QString sAbsPathName, QFileInfo finfo, int iLoop);
     void addMetaContents(QMap<QString, QStringList>* pMetas, QString sMetaName, QString sMetaValue);
     void enrichMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMetaContents, QFileInfo finfo);
     void finishIndexing(bool bInterruptionRequested);
