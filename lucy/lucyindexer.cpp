@@ -110,11 +110,17 @@ void lucyindexer::onIndexerThreadFinished()
 {
     if(m_pIndexWriter)
     {
+        static QMutex mutex;
+        QMutexLocker ml(&mutex);
+
         QTime t;
         t.start();
         m_pIndexWriter->flush();
         m_pIndexWriter->optimize();
-        this->m_pLogger->wrn("optimized in "+logger::t_elapsed(t.elapsed())+" "+this->m_sDir2Index);
+        if(t.elapsed() > 999)
+        {
+            this->m_pLogger->inf("optimized in "+logger::t_elapsed(t.elapsed())+" "+this->m_sDir2Index);
+        }
     }
 }
 QString lucyindexer::metaName(QString sRawMetaName)

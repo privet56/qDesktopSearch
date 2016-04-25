@@ -55,7 +55,9 @@ SOURCES += main.cpp \
     util/f.cpp \
     wsearch/wfieldsmodel.cpp \
     wsettings/tray.cpp \
-    util/balloon.cpp
+    util/balloon.cpp \
+    lucy/analyzer.cpp \
+    lucy/tokenizer.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -83,7 +85,9 @@ HEADERS  += mainwindow.h \
     util/f.h \
     wsearch/wfieldsmodel.h \
     wsettings/tray.h \
-    util/balloon.h
+    util/balloon.h \
+    lucy/analyzer.h \
+    lucy/tokenizer.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \

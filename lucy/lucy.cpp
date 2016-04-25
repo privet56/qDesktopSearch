@@ -3,6 +3,7 @@
 #include "cfg.h"
 #include "str.h"
 #include "f.h"
+#include "analyzer.h"
 #include <QApplication>
 
 lucy::lucy(logger* pLogger, QObject *parent) : QObject(parent), m_pLogger(pLogger), m_pAnalyzer(nullptr), m_pDirectory(nullptr)
@@ -86,5 +87,5 @@ void lucy::setDirectory(Directory* pDirectory)
 Analyzer* lucy::getNewAnalyzer()
 {
     //TODO: handle . as whitespace
-    return  new StandardAnalyzer();//WhitespaceAnalyzer|StopAnalyzer|StandardAnalyzer|SimpleAnalyzer
+    return  new analyzer();//WhitespaceAnalyzer|StopAnalyzer|StandardAnalyzer|SimpleAnalyzer
 }

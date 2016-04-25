@@ -19,6 +19,8 @@ logger::logger(cfg* pCfg, LogWnd* pTeLog, QObject *parent) : QObject(parent), m_
     m_sPathName = bLog ? (QApplication::applicationFilePath() + ".log") : QString::null;
 }
 
+//TODO: is qInstallMesssageHandler better?
+
 void logger::log(QString s, logger::LogLevel level)
 {
     qDebug() << this->level2str(level) << " " << s;;
