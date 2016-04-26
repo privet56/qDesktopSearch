@@ -32,11 +32,16 @@ void indexerWorker::doWork()
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             dir(m_sDir2Index, iLoop);
         }
+        {   //opt
+            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
+            if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished(true);
+        }
         {   //del
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             iDeletedFiles = delDeletedFiles();
         }
-        {   //opt
+        if(iDeletedFiles > (OPTIMIZE_AFTER_INDEXED_FILES / 100))
+        {   //opt again
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished(true);
         }

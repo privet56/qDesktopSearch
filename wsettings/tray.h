@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QAction>
+#include <QMovie>
 #include <QSystemTrayIcon>
 
 class QBalloonTip;
@@ -19,11 +20,14 @@ public:
     static tray* getTrayIcon();
 
 protected:
+    QMovie m_movie;
     QAction* m_paHideorShow;
 
 signals:
 
 public slots:
+    void onActivated(QSystemTrayIcon::ActivationReason reason);
+    void onIconUpdate();
     void onAbout();
     void hide_show();
     void showIfHidden();

@@ -13,6 +13,11 @@ tray::tray(QObject *parent) : QSystemTrayIcon(parent), m_paHideorShow(nullptr)
 tray::tray(const QIcon &icon, QObject *parent) : QSystemTrayIcon(icon, parent)
 {
     __trayIcon = this;
+    m_movie.setFileName(":/res/bunny_hopps.gif");
+    connect(&m_movie, SIGNAL(updated(const QRect&)),this,SLOT(onIconUpdate()));
+    m_movie.start();
+
+    connect(this, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(onActivated(QSystemTrayIcon::ActivationReason)));
 }
 
 void tray::setup()
@@ -70,6 +75,18 @@ void tray::showIfHidden()
         return;
     }
     this->hide_show();
+}
+
+void tray::onActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    Q_UNUSED(reason)
+    showIfHidden();
+}
+
+void tray::onIconUpdate()
+{
+    QIcon icon(m_movie.currentPixmap());
+    this->setIcon(icon);
 }
 
 tray* tray::getTrayIcon()
