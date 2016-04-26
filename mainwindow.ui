@@ -167,6 +167,7 @@
      <string>File</string>
     </property>
     <addaction name="actionMinimize"/>
+    <addaction name="actionAbout"/>
     <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -180,6 +181,7 @@
    </attribute>
    <addaction name="actionMinimize"/>
    <addaction name="actionExit"/>
+   <addaction name="actionAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionExit">
@@ -204,6 +206,18 @@
    </property>
    <property name="toolTip">
     <string>Minimize to Tray</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/qbun.png</normaloff>:/res/qbun.png</iconset>
+   </property>
+   <property name="text">
+    <string>About...</string>
+   </property>
+   <property name="toolTip">
+    <string>About...</string>
    </property>
   </action>
  </widget>

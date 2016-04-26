@@ -18,6 +18,8 @@
 #include "str.h"
 #include <QApplication>
 
+#define OPTIMIZE_AFTER_INDEXED_FILES 100000
+
 using namespace lucene;
 using namespace lucene::analysis;
 using namespace lucene::analysis::standard;

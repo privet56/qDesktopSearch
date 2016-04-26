@@ -100,16 +100,22 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
     m_pIndexWriter->addDocument(&doc);
     m_iIndexedFiles++;
 
-    if((m_iIndexedFiles % 100000) == 0) //TODO: if(win64)->100000 if(win32)->10000
+    if((m_iIndexedFiles % OPTIMIZE_AFTER_INDEXED_FILES) == 0) //TODO: if(win64)->100000 if(win32)->10000
     {
         onIndexerThreadFinished();
     }
 }
 
-void lucyindexer::onIndexerThreadFinished()
+void lucyindexer::onIndexerThreadFinished(bool bIndexerLoopFinished/*=false*/)
 {
-    if(m_pIndexWriter)
+    if(m_pIndexWriter &&
+       (
+        ( m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES) ||
+        ((m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES/10) && bIndexerLoopFinished)
+       )
+      )
     {
+        //TODO: how to make it better (currently the UI is blocked while optimizing)? ipc?
         static QMutex mutex;
         QMutexLocker ml(&mutex);
 
@@ -121,6 +127,10 @@ void lucyindexer::onIndexerThreadFinished()
         {
             this->m_pLogger->inf("optimized in "+logger::t_elapsed(t.elapsed())+" "+this->m_sDir2Index);
         }
+    }
+    if(bIndexerLoopFinished)
+    {
+        this->m_iIndexedFiles = 0;
     }
 }
 QString lucyindexer::metaName(QString sRawMetaName)

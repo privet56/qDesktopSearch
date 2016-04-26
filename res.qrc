@@ -31,5 +31,6 @@
 		<file>res/expander_ic_minimized.9.png</file>
 		<file>res/minus-sign.png</file>
 		<file>res/restorenormalscreen.png</file>
+		<file>res/qbun.png</file>
     </qresource>
 </RCC>

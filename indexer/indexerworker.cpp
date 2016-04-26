@@ -28,30 +28,26 @@ void indexerWorker::doWork()
         m_iIndexedFiles     = 0;
         int iDeletedFiles   = 0;
 
-        {   //opt
-            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
-            if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished();
-        }
         {   //idx
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             dir(m_sDir2Index, iLoop);
-        }
-        {   //opt
-            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
-            if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished();
         }
         {   //del
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             iDeletedFiles = delDeletedFiles();
         }
+        {   //opt
+            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
+            if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished(true);
+        }
 
         m_iIndexingTime = t.elapsed();
         m_pLogger->inf("an indexer thread finished. found#:"+QString::number(getNrOfFoundFiles())+" indexed#:"+QString::number(getNrOfIndexedFiles())+" NrOfFilesInIdx:"+QString::number(getNrOfFilesInIndex())+" deleteds:"+QString::number(iDeletedFiles)+" time:"+logger::t_elapsed(getIndexTime())+"  dir:"+getIndexedDir()+" loop:"+QString::number(iLoop));
 
-        for(int i=0;i<99;i++)
+        for(int i=0;i<3333;i++)
         {
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
-            QThread::msleep(2999/*milliseconds*/);
+            QThread::msleep(99/*milliseconds*/);
         }
 
         t.restart();
@@ -91,20 +87,6 @@ void indexerWorker::dir(QString sDir, int iLoop)
 void indexerWorker::file(QString sAbsPathName, QFileInfo finfo, int iLoop)
 {
     m_iFoundFiles++;
-    bool bIsBigFile = false;
-
-    {   //if(file>xxxMB)->return;  //because the jvm has to work on the ui thread
-        qint64 iSizeInBytes = finfo.size();
-        qint64 iSizeInMB    = iSizeInBytes / 1048576;          //1 MB = 1024 KB = 1048576 Byte
-        if(iSizeInMB > 99)
-        {
-            if(iLoop < 2)
-            {   //wrn only in the first loop
-                this->m_pLogger->wrn("file too big to be indexed("+QString::number(iSizeInMB)+"MB) fn:"+sAbsPathName);
-            }
-            bIsBigFile = true;
-        }
-    }
 
     if(QThread::currentThread()->isInterruptionRequested())
     {
@@ -119,6 +101,20 @@ void indexerWorker::file(QString sAbsPathName, QFileInfo finfo, int iLoop)
     if(QThread::currentThread()->isInterruptionRequested())
     {
         return;
+    }
+
+    bool bIsBigFile = false;
+    {   //if(file>xxxMB)->return;  //because the jvm has to work on the ui thread
+        qint64 iSizeInBytes = finfo.size();
+        qint64 iSizeInMB    = iSizeInBytes / 1048576;          //1 MB = 1024 KB = 1048576 Byte
+        if(iSizeInMB > 99)
+        {
+            //if(iLoop < 2)
+            {   //wrn only in the first loop
+                this->m_pLogger->wrn("file too big to be indexed("+QString::number(iSizeInMB)+"MB) fn:"+sAbsPathName);
+            }
+            bIsBigFile = true;
+        }
     }
 
     QMap<QString, QStringList>* pMetaContents = new QMap<QString, QStringList>();

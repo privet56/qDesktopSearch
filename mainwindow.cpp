@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "tray.h"
 #include "ui_mainwindow.h"
 #include <QTimer>
 
@@ -38,5 +39,10 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionMinimize_triggered()
 {
+    tray::getTrayIcon()->hide_show();
+}
 
+void MainWindow::on_actionAbout_triggered()
+{
+    tray::getTrayIcon()->onAbout();
 }

@@ -22,7 +22,7 @@ public:
     int getNrOfFilesInIndex();
     bool isIndexed(QString sAbsPathName, QFileInfo finfo);
     void index(QString sAbsPathName, QMap<QString, QStringList>* pMetaContents, QFileInfo finfo);
-    void onIndexerThreadFinished();
+    void onIndexerThreadFinished(bool bIndexerLoopFinished=false);
     QString getIdFNandDATE(QString sAbsPathName, QFileInfo finfo);
     IndexModifier* getIndexer();
 

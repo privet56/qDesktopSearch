@@ -253,7 +253,7 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
 
 #ifdef _DEBUG
     QStringList sl;
-    sl << "fulltext dummy text";
+    sl << QString("fulltext dummy text").repeated(99);
     pMetas->operator []("text") = sl;
     return;
 #endif
@@ -272,7 +272,7 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
     jobject oBodyContentHandler = getObject("org.apache.tika.sax.BodyContentHandler");
 //call parse
     {
-        jclass cAutoDetectParser = m_pEnv->GetObjectClass(oAutoDetectParser);
+        jclass cAutoDetectParser = this->getClass("org.apache.tika.parser.AutoDetectParser");//m_pEnv->GetObjectClass(oAutoDetectParser);
         QString sSignature("("
                            "Ljava/io/InputStream;"
                            "Lorg/xml/sax/ContentHandler;"
@@ -289,7 +289,7 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
     }
 //extract fulltext
     {
-        jclass cBodyContentHandler = m_pEnv->GetObjectClass(oBodyContentHandler);
+        jclass cBodyContentHandler = this->getClass("org.apache.tika.sax.BodyContentHandler");//m_pEnv->GetObjectClass(oBodyContentHandler);
         jmethodID toString = m_pEnv->GetMethodID(cBodyContentHandler, "toString", "()Ljava/lang/String;");
         if(!toString)
         {
@@ -304,7 +304,7 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
     }
 //extract metas
     {
-        jclass cMetadata    = m_pEnv->GetObjectClass(oMetadata);
+        jclass cMetadata    = getClass("org.apache.tika.metadata.Metadata");//m_pEnv->GetObjectClass(oMetadata);
         jmethodID names     = m_pEnv->GetMethodID(cMetadata, "names", "()[Ljava/lang/String;");
         if(!names){this->m_pLogger->err("cannot load names");return;}
         jobjectArray array  = (jobjectArray)m_pEnv->CallObjectMethod(oMetadata, names);

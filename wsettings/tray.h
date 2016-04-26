@@ -24,6 +24,7 @@ protected:
 signals:
 
 public slots:
+    void onAbout();
     void hide_show();
     void showIfHidden();
 };
