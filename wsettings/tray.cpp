@@ -1,5 +1,7 @@
 #include "tray.h"
 #include <QMenu>
+#include "mainwindow.h"
+#include <QMainWindow>
 #include <QApplication>
 #include <QMessageBox>
 
@@ -32,6 +34,11 @@ void tray::setup()
         QAction* quitAction = new QAction(QIcon(":/res/exit.png"), "Quit", this);
         connect(quitAction,SIGNAL(triggered()), this->parent()/*the main window*/, SLOT(close()));
         menu->addAction(quitAction);
+    }
+    {
+        QAction* mascotAction = new QAction(QIcon(":/res/bun.png"), "Show Mascot...", this);
+        connect(mascotAction,SIGNAL(triggered()), this, SLOT(on_actionShow_Mascot()));
+        menu->addAction(mascotAction);
     }
     {
         QAction* aboutAction = new QAction(QIcon(":/res/qbun.png"), "About...", this);
@@ -79,17 +86,37 @@ void tray::showIfHidden()
 
 void tray::onActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    Q_UNUSED(reason)
-    showIfHidden();
+    if(reason == QSystemTrayIcon::DoubleClick)
+    {
+        showIfHidden();
+    }
 }
 
 void tray::onIconUpdate()
 {
     QIcon icon(m_movie.currentPixmap());
     this->setIcon(icon);
+    QWidget* parentWnd = (QWidget*)parent();
+    if(parentWnd)
+    {
+        QMainWindow* pMainWnd = (QMainWindow*)parentWnd; //TODO: q_cast
+        pMainWnd->setWindowIcon(icon);
+    }
 }
 
 tray* tray::getTrayIcon()
 {
     return __trayIcon;
+}
+
+void tray::on_actionShow_Mascot()
+{
+    showIfHidden();
+
+    QWidget* parentWnd = (QWidget*)parent();
+    if(parentWnd)
+    {
+        MainWindow* pMainWnd = (MainWindow*)parentWnd; //TODO: q_cast
+        pMainWnd->on_actionShow_Mascot_triggered();
+    }
 }

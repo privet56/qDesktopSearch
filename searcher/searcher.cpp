@@ -20,6 +20,8 @@ searcher::searcher(QObject *parent) : QObject(parent),
 
 int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
 {
+    //QMutexLocker ml(lucy::getIndexerLock());  //TODO: check if needed
+
     m_lpSearchinputs.clear();
     m_lpSearchinputs << lpSearchinputs;
 
@@ -265,6 +267,7 @@ void searcher::cleanup(bool bConstructor)
         delete m_lucysearchables.at(i);
     }
     m_lucysearchables.clear();
+    m_lpSearchinputs.clear();
 }
 
 void searcher::sortBy(QString sSortFieldName, Qt::SortOrder order)
@@ -299,6 +302,8 @@ void searcher::sortBy(QString sSortFieldName, Qt::SortOrder order)
 
 QSet<QString> searcher::fields()
 {
+    QMutexLocker ml(lucy::getIndexerLock());
+
     QString sDirs2Index(this->m_pLog->GetCfg()->getValue(DIRS2INDEX));
     QStringList sl = sDirs2Index.split('|', QString::SkipEmptyParts);
     QSet<QString> sf;

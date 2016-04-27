@@ -121,8 +121,12 @@ void wSearch::fillFields()
     QSet<QString> slFields = m_pSearcher->fields();
     QList<QString> list = slFields.toList();
     qSort(list);
-    ((wFieldsModel*)this->ui->cbField->model())->setFields(list);
-    this->ui->cbField->setCurrentText("text");
+
+    {
+        QString sCurrentText = this->ui->cbField->currentText();
+        ((wFieldsModel*)this->ui->cbField->model())->setFields(list);
+        this->ui->cbField->setCurrentText((!str::isempty(sCurrentText) && list.contains(sCurrentText)) ? sCurrentText : "text");
+    }
 
     QTimer::singleShot(4999 * 10/*msec = 5*10 secs*/, this, SLOT(fillFields()));
 }

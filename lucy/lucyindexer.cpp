@@ -17,6 +17,11 @@ void lucyindexer::open(QString sDir2Index)
     //  Note that you cannot create more than one IndexModifier object on the same directory at the same time
     m_pIndexWriter  = new IndexModifier(m_pDirectory, m_pAnalyzer, bReCreate/*recreate*/);
     m_pIndexWriter->setMaxFieldLength(INT_MAX);
+
+    if(!m_bNewIndex)
+    {
+        //onIndexerThreadFinished();
+    }
 }
 
 void lucyindexer::close(bool bDeleteCompleteIndex/*=false*/)
@@ -111,14 +116,13 @@ void lucyindexer::onIndexerThreadFinished(bool bIndexerLoopFinished/*=false*/)
     if(m_pIndexWriter &&
        (
         ( m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES) ||
-        ((m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES/10) && bIndexerLoopFinished)
+        (/*(m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES/10) && */bIndexerLoopFinished)
        )
       )
     {
         //TODO: how to make it better (currently the UI is blocked while optimizing)? ipc?
-        static QMutex mutex;
-        QMutexLocker ml(&mutex);
-
+        QMutexLocker ml(lucy::getIndexerLock());
+        m_pLogger->wrn("opt START (new:"+QString::number(m_bNewIndex)+", IdxLoopFinish:"+QString::number(bIndexerLoopFinished)+") "+this->m_sDir2Index);
         QTime t;
         t.start();
         m_pIndexWriter->flush();
@@ -127,10 +131,15 @@ void lucyindexer::onIndexerThreadFinished(bool bIndexerLoopFinished/*=false*/)
         {
             this->m_pLogger->inf("optimized in "+logger::t_elapsed(t.elapsed())+" "+this->m_sDir2Index);
         }
+        else
+        {
+            m_pLogger->wrn("opt END.. (new:"+QString::number(m_bNewIndex)+", IdxLoopFinish:"+QString::number(bIndexerLoopFinished)+") "+this->m_sDir2Index);
+        }
     }
     if(bIndexerLoopFinished)
     {
         this->m_iIndexedFiles = 0;
+        this->m_bNewIndex = false;
     }
 }
 QString lucyindexer::metaName(QString sRawMetaName)

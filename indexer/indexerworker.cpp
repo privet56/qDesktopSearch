@@ -32,16 +32,11 @@ void indexerWorker::doWork()
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             dir(m_sDir2Index, iLoop);
         }
-        {   //opt
-            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
-            if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished(true);
-        }
         {   //del
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             iDeletedFiles = delDeletedFiles();
         }
-        if(iDeletedFiles > (OPTIMIZE_AFTER_INDEXED_FILES / 100))
-        {   //opt again
+        {   //opt
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished(true);
         }
@@ -255,6 +250,7 @@ void indexerWorker::finishIndexing(bool bInterruptionRequested)
 
 int indexerWorker::delDeletedFiles()
 {
+    m_pLogger->wrn("delDeletedFiles start");
     QString sFieldNameAbsPathName = QString::fromStdWString(FIELDNAME_ABSPATHNAME);
     int iDeletedDocs = 0;
     IndexModifier* pIndexer = m_pLucyIndexer->getIndexer();
@@ -288,5 +284,6 @@ int indexerWorker::delDeletedFiles()
         }
     }
 
+    m_pLogger->wrn("delDeletedFiles end (deleteds: "+QString::number(iDeletedDocs)+")");
     return iDeletedDocs;
 }

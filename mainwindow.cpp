@@ -6,6 +6,7 @@
 MainWindow::MainWindow(QSplashScreen* pSplash, logger* pLog, indexer* pIndexer, QWidget *parent) :
     QMainWindow(parent),
     m_pLog(pLog),
+    m_pSplash(pSplash),
     m_pIndexer(pIndexer),
     ui(new Ui::MainWindow)
 {
@@ -45,4 +46,10 @@ void MainWindow::on_actionMinimize_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     tray::getTrayIcon()->onAbout();
+}
+
+void MainWindow::on_actionShow_Mascot_triggered()
+{
+    this->m_pSplash->showMessage(" ");
+    this->m_pSplash->show();
 }

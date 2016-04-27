@@ -18,7 +18,7 @@
 #include "str.h"
 #include <QApplication>
 
-#define OPTIMIZE_AFTER_INDEXED_FILES 100000
+#define OPTIMIZE_AFTER_INDEXED_FILES 1000000
 
 using namespace lucene;
 using namespace lucene::analysis;
@@ -44,6 +44,7 @@ public:
     void setDirectory(Directory* pDirectory);
     static QString idxDir4Dir2Index(QString sDir2Index);
     static Analyzer* getNewAnalyzer();
+    static QMutex* getIndexerLock();
 
 protected:
     logger* m_pLogger;

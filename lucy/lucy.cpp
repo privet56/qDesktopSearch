@@ -89,3 +89,9 @@ Analyzer* lucy::getNewAnalyzer()
     //TODO: handle . as whitespace
     return  new analyzer();//WhitespaceAnalyzer|StopAnalyzer|StandardAnalyzer|SimpleAnalyzer
 }
+
+QMutex* lucy::getIndexerLock()
+{
+    static QMutex mutex;
+    return &mutex;
+}

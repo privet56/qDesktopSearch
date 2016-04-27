@@ -167,6 +167,7 @@
      <string>File</string>
     </property>
     <addaction name="actionMinimize"/>
+    <addaction name="actionShow_Mascot"/>
     <addaction name="actionAbout"/>
     <addaction name="actionExit"/>
    </widget>
@@ -181,6 +182,7 @@
    </attribute>
    <addaction name="actionMinimize"/>
    <addaction name="actionExit"/>
+   <addaction name="actionShow_Mascot"/>
    <addaction name="actionAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -218,6 +220,18 @@
    </property>
    <property name="toolTip">
     <string>About...</string>
+   </property>
+  </action>
+  <action name="actionShow_Mascot">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/bun.png</normaloff>:/res/bun.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Mascot...</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Mascot...</string>
    </property>
   </action>
  </widget>

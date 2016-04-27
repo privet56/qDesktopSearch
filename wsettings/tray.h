@@ -27,6 +27,7 @@ signals:
 
 public slots:
     void onActivated(QSystemTrayIcon::ActivationReason reason);
+    void on_actionShow_Mascot();
     void onIconUpdate();
     void onAbout();
     void hide_show();
