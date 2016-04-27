@@ -157,7 +157,10 @@ int lucyindexer::getNrOfIndexedFiles()
 int lucyindexer::getNrOfFilesInIndex()
 {
     if(this->m_pIndexWriter)
+    {
+        QMutexLocker ml(lucy::getIndexerLock());
         return this->m_pIndexWriter->docCount();
+    }
     return 0;
 }
 
@@ -166,7 +169,15 @@ QString lucyindexer::getIdFNandDATE(QString sAbsPathName, QFileInfo finfo)
     sAbsPathName = str::normalizePath(sAbsPathName, false);
     return QString::number(qHash(sAbsPathName)) + "_" + QString::number(finfo.lastModified().toTime_t());
 }
+
 IndexModifier* lucyindexer::getIndexer()
 {
     return this->m_pIndexWriter;
+}
+
+void lucyindexer::fillIdxInfo(IdxInfo* idxi)
+{
+    idxi->setIndexNrOfFilesInIndex(this->getNrOfFilesInIndex());
+    idxi->setIndexIsNew(this->m_bNewIndex);
+    idxi->setIndexNrOfIndexedFilesInCurrentLoop(getNrOfIndexedFiles());
 }

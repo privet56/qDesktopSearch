@@ -16,6 +16,7 @@ void indexerWorker::doWork()
 {
     openIndex();
 
+    //ATTENZIONE: 'BlockingQueuedConnection' is important here, but works only if target is in another thread!
     connect(this,SIGNAL(getMetaContents(QString,QMap<QString, QStringList>*)),this->m_pJvm,SLOT(getMetaContents(QString,QMap<QString, QStringList>*)), Qt::BlockingQueuedConnection);
 
     t.start();
@@ -32,11 +33,16 @@ void indexerWorker::doWork()
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             dir(m_sDir2Index, iLoop);
         }
+        {   //opt
+            if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
+            if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished(true);
+        }
         {   //del
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             iDeletedFiles = delDeletedFiles();
         }
-        {   //opt
+        if(iDeletedFiles > 999)
+        {   //opt again
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished(true);
         }
@@ -86,6 +92,14 @@ void indexerWorker::dir(QString sDir, int iLoop)
 
 void indexerWorker::file(QString sAbsPathName, QFileInfo finfo, int iLoop)
 {
+    {   //do not index your own index
+        sAbsPathName = str::normalizePath(sAbsPathName, false);
+        if(sAbsPathName.indexOf("/idx/") > 1)
+        {
+            return;
+        }
+    }
+
     m_iFoundFiles++;
 
     if(QThread::currentThread()->isInterruptionRequested())
@@ -244,6 +258,7 @@ void indexerWorker::finishIndexing(bool bInterruptionRequested)
     close();
     if(bInterruptionRequested)
     {
+        QThread::currentThread()->quit();
         QThread::currentThread()->terminate();
     }
 }
@@ -251,31 +266,30 @@ void indexerWorker::finishIndexing(bool bInterruptionRequested)
 int indexerWorker::delDeletedFiles()
 {
     m_pLogger->wrn("delDeletedFiles start");
-    QString sFieldNameAbsPathName = QString::fromStdWString(FIELDNAME_ABSPATHNAME);
     int iDeletedDocs = 0;
+    //QMutexLocker ml(lucy::getIndexerLock());  //not needed
+
     IndexModifier* pIndexer = m_pLucyIndexer->getIndexer();
     int32_t maxDoc = pIndexer->docCount();
     for(int i=maxDoc-1; i>-1; i--)
     {
         if(QThread::currentThread()->isInterruptionRequested()) { break; }
-        Document* pDoc = pIndexer->document(i);
-        if(!pDoc)
+        Document doc;
+        if(!pIndexer->document(i, doc))
         {
             m_pLogger->wrn("!doc for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
             continue;
         }
-        QString sAbsPathName = QString::fromStdWString(pDoc->get(sFieldNameAbsPathName.toStdWString().c_str()));
-        _CLDELETE(pDoc);
-        pDoc = nullptr;
-
         {
+            QString sAbsPathName = QString::fromStdWString(doc.get(FIELDNAME_ABSPATHNAME));
             if(str::isempty(sAbsPathName, true))
             {
                 m_pLogger->wrn("!doc-absfn for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
+                continue;
             }
-            bool bExists = QFile::exists(sAbsPathName);
 
-            if(!bExists)
+            bool bExists = QFile::exists(sAbsPathName);
+            if( !bExists)
             {
                 if(QThread::currentThread()->isInterruptionRequested()) { break; }
                 pIndexer->deleteDocument(i);
@@ -286,4 +300,13 @@ int indexerWorker::delDeletedFiles()
 
     m_pLogger->wrn("delDeletedFiles end (deleteds: "+QString::number(iDeletedDocs)+")");
     return iDeletedDocs;
+}
+void indexerWorker::fillIdxInfo(IdxInfo* idxi)
+{
+    if(!this->m_pLucyIndexer)
+    {
+        m_pLogger->wrn("no lucyIndexer to fill info");
+        return;
+    }
+    this->m_pLucyIndexer->fillIdxInfo(idxi);
 }

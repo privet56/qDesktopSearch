@@ -8,6 +8,7 @@
 #include "jvm.h"
 #include "lucyindexer.h"
 #include "logger.h"
+#include "idxinfo.h"
 
 class indexerWorker : public QObject
 {
@@ -47,6 +48,7 @@ signals:
 
 public slots:
     void doWork();
+    void fillIdxInfo(IdxInfo* idxi);
 
 };
 

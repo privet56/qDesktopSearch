@@ -41,6 +41,7 @@ wSearch::~wSearch()
 void wSearch::on_eSearchTerm_textChanged(const QString &arg1)
 {
     this->ui->commandLinkButtonSearch->setEnabled(!str::isempty(arg1));
+    //TODO: autocomplete!?
 }
 
 void wSearch::on_commandLinkButtonSearch_clicked()
@@ -91,6 +92,7 @@ void wSearch::setEnv(logger* pLog, indexer* pIndexer)
     ((wsearchresultModel*)this->ui->tableView->model())->setEnv(pLog, pIndexer);
     ((wFieldsModel*)this->ui->cbField->model())->setEnv(this->m_pLog, this->m_pSearcher);
 
+    //TODO: should I also reset resultlist before optimization?
     connect(pLog->GetCfg(), SIGNAL(cfgChanged(QString, QString)), this, SLOT(OnCfgChanged(QString, QString)));
     QTimer::singleShot(4999/*msec = 5 secs*/, this, SLOT(fillFields()));
 }
@@ -144,7 +146,7 @@ void wSearch::on_actionInfo()
     pAllAttrsTable->setColumnWidth(0, 199);
     pAllAttrsTable->setCornerButtonEnabled(true);
     pAllAttrsTable->setShowGrid(true);
-    pAllAttrsTable->setSortingEnabled(true);
+    pAllAttrsTable->setSortingEnabled(false);
     pAllAttrsTable->horizontalHeader()->setStretchLastSection(true);
     QStringList slTableHeader;
     slTableHeader << "Attribute" << "Value";

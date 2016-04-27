@@ -42,8 +42,11 @@ void indexer::add(QString sDir2Index)
     //QThread::msleep(999/*milliseconds*/);
 
     indexerWorker* pWorker = new indexerWorker(sDir2Index, m_pLogger, m_pJvm/*, m_pLucyIndexer*/);
-    pWorker->openIndex();
+    //pWorker->openIndex();
     indexerThread* pThread = new indexerThread(pWorker, m_pLogger, m_pJvm);
+
+    //TODO: fix! it blocks!
+    connect(this    ,SIGNAL(fillIdxInfo(IdxInfo*)),  pWorker, SLOT(fillIdxInfo(IdxInfo*)), Qt::BlockingQueuedConnection);
 
     pWorker->moveToThread(pThread);
     connect(pThread, SIGNAL(started()) , pWorker, SLOT(doWork()));
@@ -84,7 +87,9 @@ bool indexer::isStoppedAll()
     {
         i.next();
         if(i.value()->isRunning())      //if(!i.value()->isFinished()) would be an alternative check
+        {
             return false;
+        }
     }
     return true;
 }
@@ -158,6 +163,29 @@ void indexer::removeIndex(QString sDir2Index)
                 m_pLogger->wrn("could not delete idx "+sAbsDirIdx);
             else
                 m_pLogger->inf("idx deleted "+sAbsDirIdx);
+        }
+    }
+}
+
+void indexer::getIdxInfo(IdxInfo* pIdxInfo, QString sDir2Index, bool bAskLucy)
+{
+    pIdxInfo->fill(sDir2Index);
+
+    if(bAskLucy)
+    {
+        indexerThread* pThread = this->m_pWorkers[sDir2Index];
+        if(pThread && pThread->getWorker())
+        {
+            indexerWorker* pWorker = pThread->getWorker();
+            lucyindexer* pIndexer  = pWorker->getIndexer();
+            //connect(this    ,SIGNAL(fillIdxInfo(IdxInfo*)),  pWorker, SLOT(fillIdxInfo(IdxInfo*))/*, Qt::BlockingQueuedConnection*/);
+            //emit fillIdxInfo(pIdxInfo);
+            pIndexer->fillIdxInfo(pIdxInfo);
+            //disconnect(this ,SIGNAL(fillIdxInfo(IdxInfo*)),  pWorker, SLOT(fillIdxInfo(IdxInfo*)));
+        }
+        else
+        {
+            m_pLogger->wrn("could not find thread for '"+sDir2Index+"'");
         }
     }
 }

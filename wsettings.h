@@ -23,6 +23,7 @@ protected:
     logger* m_pLog;
     indexer* m_pIndexer;
     void refreshtableViewDirs(int iCfgEntriesLen);
+    void contextMenuAt(QPoint pos, int selectedItem);
 
 private slots:
     void on_toolButtonAdd_clicked();
@@ -30,6 +31,11 @@ private slots:
     void on_tableViewDirs_clicked(const QModelIndex &index);
     void on_toolButtonInfo_clicked();
     void on_init();
+    void on_updateIdxInfo();
+    void on_actionOpen();
+
+    void on_tableViewDirs_customContextMenuRequested(const QPoint &pos);
+    void on_tableWidgetDirsInfo_customContextMenuRequested(const QPoint &pos);
 
 private:
     Ui::wSettings *ui;

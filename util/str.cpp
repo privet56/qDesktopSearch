@@ -1,6 +1,7 @@
 #include "str.h"
 #include <QDir>
 #include <QChar>
+#include <QLocale>
 
 str::str(QObject *parent) : QObject(parent)
 {
@@ -64,4 +65,10 @@ bool str::isempty(QString s, bool bTrim)
     s = s.trimmed();
     if(s.isNull() || s.isEmpty())return true;
     return false;
+}
+
+QString str::intWithThousandSeps(int i)
+{
+    QLocale l;  //this would return the number with ',' : QLocale l(QLocale::English, QLocale::UnitedStates);
+    return l.toString((float)i, 'f', 0);
 }

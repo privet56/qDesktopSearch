@@ -18,6 +18,7 @@ public:
     static QString makeAbsFN(QString sBase, QString sAppend);
     static QString normalizePath(QString sPath, bool bLowerCase);
     static bool isempty(QString s, bool bTrim=true);
+    static QString intWithThousandSeps(int i);
 
 signals:
 

@@ -57,7 +57,8 @@ SOURCES += main.cpp \
     wsettings/tray.cpp \
     util/balloon.cpp \
     lucy/analyzer.cpp \
-    lucy/tokenizer.cpp
+    lucy/tokenizer.cpp \
+    indexer/idxinfo.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -87,7 +88,8 @@ HEADERS  += mainwindow.h \
     wsettings/tray.h \
     util/balloon.h \
     lucy/analyzer.h \
-    lucy/tokenizer.h
+    lucy/tokenizer.h \
+    indexer/idxinfo.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \

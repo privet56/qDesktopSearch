@@ -29,5 +29,5 @@ TokenStream* analyzer::reusableTokenStream(const TCHAR* fieldName, CL_NS(util)::
 
 analyzer::~analyzer()
 {
-
+    //TODO: fix crash in ~StandardAnalyzer (it destroys sometimes a destroyed filteredTokenStream)
 }

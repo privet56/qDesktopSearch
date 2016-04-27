@@ -6,6 +6,7 @@
 #include "jvm.h"
 #include "lucyindexer.h"
 #include "logger.h"
+#include "idxinfo.h"
 
 class indexer : public QObject
 {
@@ -20,6 +21,7 @@ public:
     void stopAll();
     bool isStoppedAll();
     void init();
+    void getIdxInfo(IdxInfo* pIdxInfo, QString sDir2Index, bool bAskLucy);
 
 protected:
     QMap<QString, indexerThread*> m_pWorkers;
@@ -27,6 +29,7 @@ protected:
     jvm* m_pJvm;
 
 signals:
+    void fillIdxInfo(IdxInfo* idxi);
 
 public slots:
     void onThreadFinished();

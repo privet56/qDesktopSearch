@@ -9,6 +9,7 @@
 #include <QStringList>
 #include <QFileInfo>
 #include "lucy.h"
+#include "idxinfo.h"
 
 class lucyindexer : public lucy
 {
@@ -29,10 +30,14 @@ public:
     QString metaName(QString sRawMetaName);
 
 protected:
-    //IndexWriter* m_pIndexWriter;
-    IndexModifier* m_pIndexWriter;
+    IndexModifier* m_pIndexWriter;      //the alternative would be IndexWriter*
     int m_iIndexedFiles;
     bool m_bNewIndex;
+
+public slots:
+    void fillIdxInfo(IdxInfo* idxi);
+
+signals:
 
 };
 
