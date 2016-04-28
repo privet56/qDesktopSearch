@@ -1,5 +1,5 @@
-#ifndef ANALYZER_H
-#define ANALYZER_H
+#ifndef QTOKENIZER_H
+#define QTOKENIZER_H
 
 #include "globalinclude.h"
 #include "CLucene.h"
@@ -21,15 +21,15 @@ using namespace lucene;
 using namespace lucene::analysis;
 using namespace lucene::analysis::standard;
 
-class analyzer : public StandardAnalyzer
+class QTokenizer : public CharTokenizer
 {
 public:
-    analyzer();
-    ~analyzer();
+    QTokenizer(CL_NS(util)::Reader* in, bool deleteReader=false);
+    ~QTokenizer();
 
-    TokenStream* tokenStream(const TCHAR* fieldName, CL_NS(util)::Reader* reader);
-    TokenStream* reusableTokenStream(const TCHAR* fieldName, CL_NS(util)::Reader* reader);
+    bool isTokenChar(const TCHAR c) const;
+    TCHAR normalize(const TCHAR c) const;
 
 };
 
-#endif // ANALYZER_H
+#endif // QTOKENIZER_H

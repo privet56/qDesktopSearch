@@ -12,20 +12,35 @@ searcher::searcher(QObject *parent) : QObject(parent),
     m_query(nullptr),
     m_sort(nullptr),
     m_tophits(nullptr),
+    m_pAnalyzer(nullptr),
     m_query4highlight(nullptr),
     m_hits(nullptr)
 {
     cleanup(true);
 }
 
+searcher::~searcher()
+{
+    cleanup(true);
+
+    if( this->m_pAnalyzer)
+    {
+        delete this->m_pAnalyzer;
+    }
+    this->m_pAnalyzer = nullptr;
+}
+
 int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
 {
+    if(!m_pAnalyzer)
+        m_pAnalyzer = lucy::getNewAnalyzer();
+
     //QMutexLocker ml(lucy::getIndexerLock());  //TODO: check if needed
+
+    cleanup(false);
 
     m_lpSearchinputs.clear();
     m_lpSearchinputs << lpSearchinputs;
-
-    cleanup(false);
 
     if(lpSearchinputs.size() < 1)
     {
@@ -63,16 +78,18 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
         QPair<QString, QString> pSearchInput = lpSearchinputs.at(i);
         QString sSearchString = pSearchInput.first;
         QString sSearchField  = pSearchInput.second;
-        m_query->add(QueryParser::parse(sSearchString.toStdWString().c_str(), sSearchField.toStdWString().c_str(), lucy::getNewAnalyzer()), true/*handle delete*/, BooleanClause::SHOULD);
+
+        m_query->add(QueryParser::parse(sSearchString.toStdWString().c_str(), sSearchField.toStdWString().c_str(), m_pAnalyzer), true/*handle delete*/, BooleanClause::SHOULD);
         {
             sSearchString = sSearchString.replace("*", ""); //TODO: fix highlighter instead of modifying the query
-            m_query4highlight->add(QueryParser::parse(sSearchString.toStdWString().c_str(), sSearchField.toStdWString().c_str(), lucy::getNewAnalyzer()), true/*handle delete*/, BooleanClause::SHOULD);
+            m_query4highlight->add(QueryParser::parse(sSearchString.toStdWString().c_str(), sSearchField.toStdWString().c_str(), m_pAnalyzer), true/*handle delete*/, BooleanClause::SHOULD);
         }
     }
 
     m_sort = _CLNEW Sort(SortField::FIELD_SCORE()/*=? RELEVANCE*/);
     //TODO: set max hits
     //m_tophits = m_pMultiSearcher->_search(m_query, nullptr/*filter*/, 999/*max docs*/, m_sort);
+    //TODO: impl hits-wrapper with caching of the already asked attrs/hitEnvs (because the resultList asks often; eg. while resizing the widget!)
     m_hits = m_pMultiSearcher->search(m_query, nullptr/*filter*/, m_sort);
 
     size_t iHits = (m_hits == nullptr ? 0 : m_hits->length());
@@ -184,7 +201,7 @@ QString searcher::GetHitEnv(int iHitNr)
         int maxNumFragmentsRequired     = 3;
         const TCHAR* fragmentSeparator  = _T("...");
         StringReader reader(text);
-        TokenStream* tokenStream = this->m_lucysearchables.at(0)->getAnalyzer()->tokenStream(sFieldName2BeHighlighted.toStdWString().c_str(), &reader);
+        TokenStream* tokenStream = m_pAnalyzer->tokenStream(sFieldName2BeHighlighted.toStdWString().c_str(), &reader);
         if(!tokenStream)return "";
 
         TCHAR* result =
@@ -201,7 +218,12 @@ QString searcher::GetHitEnv(int iHitNr)
         _CLDELETE_CARRAY(result);
         _CLDELETE(tokenStream);
 
-        sHitEnv.replace('\n', ' ').replace('\t', ' ').replace("  ", " ");
+        sHitEnv.replace('\n', ' ').replace('\t', ' ').replace("  ", " ").trimmed();
+
+        if((iHitNr < 3) && str::isempty(sHitEnv, true))
+        {
+            this->m_pLog->wrn("no hitenv for '"+sFieldName2BeHighlighted+"' ("+QString::number(m_lpSearchinputs.length())+") at hitNr:"+QString::number(iHitNr)+"");
+        }
 
         return sHitEnv;
     }
@@ -263,7 +285,8 @@ void searcher::cleanup(bool bConstructor)
     for(int i=0;i<m_lucysearchables.length();i++)
     {
         m_lucysearchables.at(i)->setDirectory(nullptr);
-        m_lucysearchables.at(i)->setSearcher(nullptr);
+        //m_lucysearchables.at(i)->setSearcher(nullptr);    //TODO: check why this line is needed.!?
+        m_lucysearchables.at(i)->close();
         delete m_lucysearchables.at(i);
     }
     m_lucysearchables.clear();

@@ -18,6 +18,7 @@ class searcher : public QObject
     Q_OBJECT
 public:
     explicit searcher(QObject *parent = 0);
+    ~searcher();
 
     void setEnv(logger* pLog, indexer* pIndexer);
 
@@ -32,6 +33,7 @@ public:
     QSet<QString> fields();
 
 protected:
+    Analyzer* m_pAnalyzer;
     logger* m_pLog;
     indexer* m_pIndexer;
 

@@ -56,9 +56,11 @@ SOURCES += main.cpp \
     wsearch/wfieldsmodel.cpp \
     wsettings/tray.cpp \
     util/balloon.cpp \
-    lucy/analyzer.cpp \
-    lucy/tokenizer.cpp \
-    indexer/idxinfo.cpp
+    indexer/idxinfo.cpp \
+    lucy/QTokenizer.cpp \
+    lucy/QSimpleAnalyzer.cpp \
+    lucy/QStandardAnalyzer.cpp \
+    lucy/QStandardTokenizer.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -87,9 +89,11 @@ HEADERS  += mainwindow.h \
     wsearch/wfieldsmodel.h \
     wsettings/tray.h \
     util/balloon.h \
-    lucy/analyzer.h \
-    lucy/tokenizer.h \
-    indexer/idxinfo.h
+    indexer/idxinfo.h \
+    lucy/QTokenizer.h \
+    lucy/QSimpleAnalyzer.h \
+    lucy/QStandardAnalyzer.h \
+    lucy/QStandardTokenizer.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \

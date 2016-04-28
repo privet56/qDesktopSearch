@@ -18,8 +18,8 @@ public:
     void add(QString sDir2Index);
     bool isIndexing(QString sDir2Index);
     void removeIndex(QString sDir2Index);
-    void stopAll();
-    bool isStoppedAll();
+    void requestStopAll();
+    bool isStoppedAll(int iCheckLoop);
     void init();
     void getIdxInfo(IdxInfo* pIdxInfo, QString sDir2Index, bool bAskLucy);
 

@@ -29,7 +29,20 @@ using namespace lucene::search;
 using namespace lucene::document;
 using namespace lucene::queryParser;
 using namespace lucene::util;
+
 CL_NS_USE2(search, highlight);
+
+CL_NS_USE(util)
+CL_NS_USE(analysis)
+CL_NS_USE(store)
+CL_NS_USE(document)
+CL_NS_USE(util)
+CL_NS_USE2(analysis,standard)
+
+#include "CLucene/_ApiHeader.h"
+#include "CLucene/util/CLStreams.h"
+#include "CLucene/util/Misc.h"
+#include "CLucene/util/_bufferedstream.h"
 
 class lucy : public QObject
 {

@@ -291,6 +291,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Start Search</string>
+        </property>
         <property name="text">
          <string>Search</string>
         </property>

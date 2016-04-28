@@ -1,18 +1,19 @@
-#include "tokenizer.h"
+#include "QTokenizer.h"
 
-tokenizer::tokenizer(CL_NS(util)::Reader* in) : CharTokenizer(in)
+QTokenizer::QTokenizer(CL_NS(util)::Reader* in, bool deleteReader/*=false*/) : CharTokenizer(in)
 {
 
 }
 
-tokenizer::~tokenizer()
+QTokenizer::~QTokenizer()
 {
 
 }
 
-bool tokenizer::isTokenChar(const TCHAR c) const
+bool QTokenizer::isTokenChar(const TCHAR c) const
 {
-    if (c == ' '    ||
+    if (c == 0      ||
+        c == ' '    ||
         c == '\t'   ||
         c == '-'    ||
         c == '.'    ||
@@ -23,7 +24,7 @@ bool tokenizer::isTokenChar(const TCHAR c) const
         c == '"'    ||
         c == ':'    ||
         c == '\''   ||
-         c == '\''   ||
+        c == '\''   ||
         c == '<'    ||
         c == '>'    ||
         c <= 9)
@@ -40,7 +41,7 @@ bool tokenizer::isTokenChar(const TCHAR c) const
     return false;
 }
 
-TCHAR tokenizer::normalize(const TCHAR c) const
+TCHAR QTokenizer::normalize(const TCHAR c) const
 {
     return c;
 }

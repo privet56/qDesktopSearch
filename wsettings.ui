@@ -345,6 +345,9 @@
          </property>
          <item>
           <widget class="QToolButton" name="toolButtonAdd">
+           <property name="toolTip">
+            <string>Add directory to be indexed...</string>
+           </property>
            <property name="text">
             <string>...</string>
            </property>
@@ -356,6 +359,9 @@
          </item>
          <item>
           <widget class="QToolButton" name="toolButtonDel">
+           <property name="toolTip">
+            <string>Delete selected Index</string>
+           </property>
            <property name="text">
             <string>...</string>
            </property>
@@ -367,6 +373,9 @@
          </item>
          <item>
           <widget class="QToolButton" name="toolButtonInfo">
+           <property name="toolTip">
+            <string>Show Info about selected Index...</string>
+           </property>
            <property name="text">
             <string>...</string>
            </property>

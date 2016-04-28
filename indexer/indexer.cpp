@@ -71,7 +71,7 @@ void indexer::onThreadFinished()
     //TODO: remove from m_pWorkers!
 }
 
-void indexer::stopAll()
+void indexer::requestStopAll()
 {
     QMapIterator<QString, indexerThread*> i(m_pWorkers);
     while (i.hasNext())
@@ -80,14 +80,25 @@ void indexer::stopAll()
         i.value()->requestInterruption();
     }
 }
-bool indexer::isStoppedAll()
+bool indexer::isStoppedAll(int iCheckLoop)
 {
     QMapIterator<QString, indexerThread*> i(m_pWorkers);
+
     while (i.hasNext())
     {
         i.next();
+
         if(i.value()->isRunning())      //if(!i.value()->isFinished()) would be an alternative check
         {
+            if(iCheckLoop > 99)
+            {
+                if(iCheckLoop < 103)
+                {
+                    m_pLogger->inf("could not stop nicely idx "+i.key());
+                }
+                i.value()->quit();
+                i.value()->terminate();
+            }
             return false;
         }
     }
@@ -96,17 +107,30 @@ bool indexer::isStoppedAll()
 
 void indexer::onQuit()
 {
-    this->stopAll();
-    while(!this->isStoppedAll())
+    this->requestStopAll();
+    int iLoop = 0;
+    bool bErrorWhileStopping = false;
+    while(!this->isStoppedAll(iLoop))
     {
-        ;
+        iLoop++;
+        QApplication::processEvents();
+        QThread::msleep(99/*milliseconds*/);
+        if(iLoop > 333)
+        {
+            m_pLogger->inf("could not stop nicely all idx's");
+            bErrorWhileStopping = true;
+            break;
+        }
     }
     {   //cleanup
         QMapIterator<QString, indexerThread*> i(m_pWorkers);
         while (i.hasNext())
         {
             i.next();
-            delete i.value();
+            if(!bErrorWhileStopping)
+            {
+                delete i.value();
+            }
         }
         m_pWorkers.clear();
     }

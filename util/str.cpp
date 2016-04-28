@@ -69,6 +69,6 @@ bool str::isempty(QString s, bool bTrim)
 
 QString str::intWithThousandSeps(int i)
 {
-    QLocale l;  //this would return the number with ',' : QLocale l(QLocale::English, QLocale::UnitedStates);
+    static QLocale l;  //this would return the number with ',' : QLocale l(QLocale::English, QLocale::UnitedStates);
     return l.toString((float)i, 'f', 0);
 }

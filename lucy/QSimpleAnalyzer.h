@@ -1,5 +1,5 @@
-#ifndef TOKENIZER_H
-#define TOKENIZER_H
+#ifndef QSIMPLEANALYZER_H
+#define QSIMPLEANALYZER_H
 
 #include "globalinclude.h"
 #include "CLucene.h"
@@ -21,15 +21,19 @@ using namespace lucene;
 using namespace lucene::analysis;
 using namespace lucene::analysis::standard;
 
-class tokenizer : public CharTokenizer
+#define ANALYZERBASE Analyzer               //his problems: not case-insensitive, no stopWords
+//#define ANALYZERBASE StandardAnalyzer
+
+//TODO: crash in ~StandardAnalyzer if base is StandardAnalyzer, check what is better to use as super: Analyzer or StandardAnalyzer(has StopFilter builtin)
+class QSimpleAnalyzer : public ANALYZERBASE
 {
 public:
-    tokenizer(CL_NS(util)::Reader* in);
-    ~tokenizer();
+    QSimpleAnalyzer();
+    ~QSimpleAnalyzer();
 
-    bool isTokenChar(const TCHAR c) const;
-    TCHAR normalize(const TCHAR c) const;
+    TokenStream* tokenStream(const TCHAR* fieldName, CL_NS(util)::Reader* reader);
+    TokenStream* reusableTokenStream(const TCHAR* fieldName, CL_NS(util)::Reader* reader);
 
 };
 
-#endif // TOKENIZER_H
+#endif // QSIMPLEANALYZER_H

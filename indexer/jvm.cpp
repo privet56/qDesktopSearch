@@ -298,9 +298,12 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
         jstring js = (jstring)m_pEnv->CallObjectMethod(oBodyContentHandler, toString);
         QString sText(js2qs(js));
         m_pEnv->DeleteLocalRef(js);
-        QStringList sl;
-        sl << sText;
-        pMetas->operator []("text") = sl;
+        if(!str::isempty(sText, true))
+        {
+            QStringList sl;
+            sl << sText;
+            pMetas->operator []("text") = sl;
+        }
     }
 //extract metas
     {

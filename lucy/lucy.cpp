@@ -3,7 +3,8 @@
 #include "cfg.h"
 #include "str.h"
 #include "f.h"
-#include "analyzer.h"
+#include "QSimpleAnalyzer.h"
+#include "QStandardAnalyzer.h"
 #include <QApplication>
 
 lucy::lucy(logger* pLogger, QObject *parent) : QObject(parent), m_pLogger(pLogger), m_pAnalyzer(nullptr), m_pDirectory(nullptr)
@@ -86,8 +87,11 @@ void lucy::setDirectory(Directory* pDirectory)
 }
 Analyzer* lucy::getNewAnalyzer()
 {
-    //TODO: handle . as whitespace
-    return  new analyzer();//WhitespaceAnalyzer|StopAnalyzer|StandardAnalyzer|SimpleAnalyzer
+    //TODO: add configurable stopWord list
+    return new QStandardAnalyzer();     //can stopWords(currently english-builtin) and is case-insensitive and has QTokenizer(the best general tokenizer, splits also by '.')
+    //return new StandardAnalyzer();
+    //return new QSimpleAnalyzer();
+    //return new WhitespaceAnalyzer|StopAnalyzer|StandardAnalyzer|SimpleAnalyzer
 }
 
 QMutex* lucy::getIndexerLock()

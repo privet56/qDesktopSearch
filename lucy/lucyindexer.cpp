@@ -82,7 +82,7 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
         doc.add(*_CLNEW Field(ID_FNANDDATE  , id_fnAndDate.toStdWString().c_str(), Field::STORE_YES | Field::INDEX_UNTOKENIZED));
     }
 
-    int config = Field::STORE_YES | Field::INDEX_TOKENIZED;
+    int config = Field::STORE_YES | Field::INDEX_TOKENIZED | Field::TERMVECTOR_WITH_POSITIONS_OFFSETS;//crashes: | Field::STORE_COMPRESS;
 
     QMapIterator<QString, QStringList> i(*pMetaContents);
     while (i.hasNext())
@@ -105,7 +105,7 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
     m_pIndexWriter->addDocument(&doc);
     m_iIndexedFiles++;
 
-    if((m_iIndexedFiles % OPTIMIZE_AFTER_INDEXED_FILES) == 0) //TODO: if(win64)->100000 if(win32)->10000
+    if((m_iIndexedFiles > 9) && ((m_iIndexedFiles % OPTIMIZE_AFTER_INDEXED_FILES) == 0)) //TODO: if(win64)->100000 if(win32)->10000
     {
         onIndexerThreadFinished();
     }
@@ -116,7 +116,7 @@ void lucyindexer::onIndexerThreadFinished(bool bIndexerLoopFinished/*=false*/)
     if(m_pIndexWriter &&
        (
         ( m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES) ||
-        (/*(m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES/10) && */bIndexerLoopFinished)
+        ((m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES/1000) && bIndexerLoopFinished)
        )
       )
     {
