@@ -8,7 +8,7 @@ class emitter : public QObject
 {
     Q_OBJECT
 public:
-    explicit emitter(QObject *parent = 0);
+    explicit emitter(QObject* pLogTarget, QObject *parent = 0);
 
     void emitlog(QString s, logger::LogLevel level, QObject* pLogTarget);
 signals:

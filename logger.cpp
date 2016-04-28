@@ -23,14 +23,18 @@ logger::logger(cfg* pCfg, LogWnd* pTeLog, QObject *parent) : QObject(parent), m_
 
 void logger::log(QString s, logger::LogLevel level)
 {
-    qDebug() << this->level2str(level) << " " << s;;
-
     bool isGuiThread = QThread::currentThread() == QCoreApplication::instance()->thread();
     if (!isGuiThread)
     {
-        emitter e(0);
+        qDebug() << this->level2str(level) << " " << s;
+        static emitter e(this, 0);  //TODO: make member instead of static
         e.emitlog(s, level, this);
         return;
+    }
+
+    if(sender() == nullptr) //not yet qDebug't in the above if -> qDebug now!
+    {
+        qDebug() << this->level2str(level) << " " << s;
     }
 
     if(s.isNull() || s.isEmpty())

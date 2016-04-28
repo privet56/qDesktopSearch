@@ -265,7 +265,7 @@ void indexerWorker::finishIndexing(bool bInterruptionRequested)
 
 int indexerWorker::delDeletedFiles()
 {
-    m_pLogger->wrn("delDeletedFiles start");
+    m_pLogger->wrn("delDeletedFiles start "+this->m_sDir2Index);
     int iDeletedDocs = 0;
     //QMutexLocker ml(lucy::getIndexerLock());  //not needed
 
@@ -298,7 +298,7 @@ int indexerWorker::delDeletedFiles()
         }
     }
 
-    m_pLogger->wrn("delDeletedFiles end (deleteds: "+QString::number(iDeletedDocs)+")");
+    m_pLogger->wrn("delDeletedFiles end (deleteds: "+QString::number(iDeletedDocs)+") "+this->m_sDir2Index);
     return iDeletedDocs;
 }
 void indexerWorker::fillIdxInfo(IdxInfo* idxi)
