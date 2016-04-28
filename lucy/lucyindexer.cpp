@@ -1,5 +1,7 @@
 #include "lucyindexer.h"
 
+#define DO_FAST_MORE_THAN_SAFE
+
 lucyindexer::lucyindexer(logger* pLogger, QObject *parent) : lucy(pLogger, parent), m_pIndexWriter(nullptr), m_iIndexedFiles(0), m_bNewIndex(false)
 {
 
@@ -43,6 +45,12 @@ lucyindexer::~lucyindexer()
 
 bool lucyindexer::isIndexed(QString sAbsPathName, QFileInfo finfo)
 {
+#ifdef DO_FAST_MORE_THAN_SAFE   //if(doFast)    -> check4OldVersions only if !new index     //if newIndex -> doc cannot be indexed
+    if(this->m_bNewIndex)       //if(newIndex)  -> there is no old version for sure!        //assumption: qHash does not create duplicates
+    {
+        return false;
+    }
+#endif
     sAbsPathName = str::normalizePath(sAbsPathName, false);
     QString id_fnAndDate = getIdFNandDATE(sAbsPathName, finfo);
     Term* term = _CLNEW Term(ID_FNANDDATE, id_fnAndDate.toStdWString().c_str());
@@ -58,7 +66,9 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
     sAbsPathName = str::normalizePath(sAbsPathName, false);
     QString id_fn           = QString::number(qHash(sAbsPathName));
     QString id_fnAndDate    = getIdFNandDATE(sAbsPathName, finfo);
-
+#ifdef DO_FAST_MORE_THAN_SAFE   //if(doFast)    -> deleteOldVersions only if !newIndex
+    if(!this->m_bNewIndex)      //if(oldIndex)  -> check for old doc version and del before indexing it in the new version
+#endif
     {   //delete old version, if there
         //TODO: don't delete in NEW index
         //TODO: is qHash enough to identify a record?

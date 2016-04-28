@@ -170,10 +170,17 @@
        <number>3</number>
       </property>
       <item>
-       <widget class="QLineEdit" name="eSearchTerm"/>
+       <widget class="QLineEdit" name="eSearchTerm">
+        <property name="toolTip">
+         <string>Search term</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QComboBox" name="cbField">
+        <property name="toolTip">
+         <string>Field to be searched</string>
+        </property>
         <property name="currentText">
          <string/>
         </property>

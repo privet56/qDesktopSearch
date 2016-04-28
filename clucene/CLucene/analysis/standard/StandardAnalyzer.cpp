@@ -60,11 +60,8 @@ CL_NS_DEF2(analysis,standard)
 
     StandardAnalyzer::~StandardAnalyzer()
     {
-        //QDESKTOPSEARCH CHANGE - BEGIN
         SavedStreams* t = reinterpret_cast<SavedStreams*>(this->getPreviousTokenStream());
         if (t) _CLDELETE(t->filteredTokenStream);
-        //QDESKTOPSEARCH CHANGE - END
-
 		_CLLDELETE(stopSet);
 	}
 
