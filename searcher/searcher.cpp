@@ -334,7 +334,7 @@ QSet<QString> searcher::fields()
     //loop all indexes
     for(int i=0;i<sl.length();i++)
     {
-        IndexReader* reader = IndexReader::open(lucy::idxDir4Dir2Index(sl.at(i)).toLatin1().constData(), true/*closeDirectoryOnCleanup*/, nullptr);
+        IndexReader* reader = IndexReader::open(lucy::idxDir4Dir2Index(sl.at(i)).toLatin1().constData(), true/*closeDirectoryOnCleanup*/, nullptr/*delPolicy*/);
         StringArrayWithDeletor fs(false);
         reader->getFieldNames(IndexReader::ALL, fs);
         size_t fsSize = fs.size();

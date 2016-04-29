@@ -1,7 +1,7 @@
 #include "lucyindexer.h"
 
 #define DO_FAST_MORE_THAN_SAFE
-//#define DO_LIGHTWEIGHT_OPTIMIZATION
+#define DO_LIGHTWEIGHT_OPTIMIZATION
 
 lucyindexer::lucyindexer(logger* pLogger, QObject *parent) : lucy(pLogger, parent), m_pIndexWriter(nullptr), m_iIndexedFiles(0), m_bNewIndex(false)
 {
@@ -198,4 +198,9 @@ void lucyindexer::fillIdxInfo(IdxInfo* idxi)
     idxi->setIndexNrOfFilesInIndex(this->getNrOfFilesInIndex());
     idxi->setIndexIsNew(this->m_bNewIndex);
     idxi->setIndexNrOfIndexedFilesInCurrentLoop(getNrOfIndexedFiles());
+}
+
+QString lucyindexer::getIndexDir()
+{
+    return this->m_sDirIndex;
 }

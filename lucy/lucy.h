@@ -44,6 +44,13 @@ CL_NS_USE2(analysis,standard)
 #include "CLucene/util/Misc.h"
 #include "CLucene/util/_bufferedstream.h"
 
+struct DOC
+{
+    QString m_sAbsFileName;
+    QString m_sid_fnanddate;
+    int m_iDocNr;
+};
+
 class lucy : public QObject
 {
     Q_OBJECT

@@ -28,6 +28,7 @@ public:
     IndexModifier* getIndexer();
 
     QString metaName(QString sRawMetaName);
+    QString getIndexDir();
 
 protected:
     IndexModifier* m_pIndexWriter;      //the alternative would be IndexWriter*

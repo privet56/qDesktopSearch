@@ -76,7 +76,7 @@ void indexerWorker::CleanUp()
     int iDeletionFailed=0;
     QString sPattern("apache-tika-*.tmp");
     f::emptydir(QDir::tempPath(), sPattern, false, iDeleteds, iDeletionFailed);
-    m_pLogger->inf("cleanup "+QDir::tempPath()+"/"+sPattern+" del:"+QString::number(iDeleteds)+" delFailed:"+QString::number(iDeletionFailed));
+    //m_pLogger->inf("cleanup "+QDir::tempPath()+"/"+sPattern+" del:"+QString::number(iDeleteds)+" delFailed:"+QString::number(iDeletionFailed));
 }
 
 void indexerWorker::dir(QString sDir, int iLoop)
@@ -283,53 +283,78 @@ void indexerWorker::finishIndexing(bool bInterruptionRequested)
 int indexerWorker::delDeletedFilesFromIdx()
 {
     m_pLogger->wrn("delDeletedFilesFromIdx start "+this->m_sDir2Index);
-    int iDeletedDocs = 0;
-    int32_t maxDoc = m_pLucyIndexer->getIndexer()->docCount();
+    QList<DOC> docs2BeDeleted;
 
-    MapFieldSelector fieldsToLoad;
-    fieldsToLoad.add(FIELDNAME_ABSPATHNAME, FieldSelector::LOAD);
-    IndexReader* pReader = IndexReader::open(m_pLucyIndexer->getDirectory());
-
-    for(int i=maxDoc-1; i>-1; i--)
     {
-        if(QThread::currentThread()->isInterruptionRequested()) { break; }
-        if(pReader->isDeleted(i))continue;
-        Document doc;
-        if(!pReader->document(i, doc, &fieldsToLoad))
+        int32_t maxDoc = m_pLucyIndexer->getIndexer()->docCount();
+        MapFieldSelector fieldsToLoad;
+        fieldsToLoad.add(FIELDNAME_ABSPATHNAME  , FieldSelector::LOAD);
+        //fieldsToLoad.add(ID_FNANDDATE           , FieldSelector::LOAD);
+        IndexReader* pReader = IndexReader::open(m_pLucyIndexer->getIndexDir().toLatin1().constData(), true/*closeDirectoryOnCleanup*/, nullptr/*idxDelPolicy*/);
+
+        for(int i=maxDoc-1; i>-1; i--)
         {
-            m_pLogger->wrn("!doc for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
-            continue;
-        }
-        if(doc.getFields()->size() != 1)
-        {
-            m_pLogger->wrn("!doc.fields("+QString::number(doc.getFields()->size())+") for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
-            continue;
-        }
-        {
-            QString sAbsPathName = QString::fromStdWString(doc.get(FIELDNAME_ABSPATHNAME));
-            if(str::isempty(sAbsPathName, true))
+            if(QThread::currentThread()->isInterruptionRequested()) { break; }
+            if(pReader->isDeleted(i))continue;
+            Document doc;
+            if(!pReader->document(i, doc, &fieldsToLoad))
             {
-                m_pLogger->wrn("!doc-absfn for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
+                m_pLogger->wrn("!doc for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
                 continue;
             }
-
-            bool bExists = QFile::exists(sAbsPathName);
-            if( !bExists)
+            if(doc.getFields()->size() != 1)
             {
-                if(QThread::currentThread()->isInterruptionRequested()) { break; }
-                m_pLucyIndexer->getIndexer()->deleteDocument(i);
-                iDeletedDocs++;
+                m_pLogger->wrn("!doc.fields("+QString::number(doc.getFields()->size())+") for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
+                continue;
+            }
+            {
+                QString sAbsPathName = QString::fromStdWString(doc.get(FIELDNAME_ABSPATHNAME));
+                if(str::isempty(sAbsPathName, true))
+                {
+                    m_pLogger->wrn("!doc-absfn for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
+                    continue;
+                }
+
+                bool bExists = QFile::exists(sAbsPathName);
+                if( !bExists)
+                {
+                    if(QThread::currentThread()->isInterruptionRequested()) { break; }
+                    DOC _doc;
+                    /*_doc.m_sid_fnanddate = QString::fromStdWString(doc.get(ID_FNANDDATE));
+                    if(str::isempty(_doc.m_sid_fnanddate, true))
+                    {
+                        m_pLogger->wrn("!doc-fn&date for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
+                        continue;
+                    }*/
+                    _doc.m_sAbsFileName  = sAbsPathName;
+                    _doc.m_iDocNr        = i;
+                    docs2BeDeleted.append(_doc);
+                    pReader->deleteDocument(i);
+                }
             }
         }
+
+        pReader->commit();  //without this line, the deletion won't be executed really
+        pReader->close();
+        _CLLDELETE(pReader);
     }
+    /*{
+        for(int i=0;i<docs2BeDeleted.size();i++)
+        {
+            DOC _doc = docs2BeDeleted.at(i);
+            if(QThread::currentThread()->isInterruptionRequested()) { break; }
+            Term* term = _CLNEW Term(ID_FNANDDATE, _doc.m_sid_fnanddate.toStdWString().c_str());   //already checked if m_sid_fnanddate is empty
+            int32_t iDeletedFiles = m_pLucyIndexer->getIndexer()->deleteDocuments(term);
+            _CLDECDELETE(term);
+            if(iDeletedFiles != 1)
+            {
+                m_pLogger->wrn("delDeletedFilesFromIdx not del("+QString::number(iDeletedFiles)+") doc:"+QString::number(_doc.m_iDocNr)+", "+_doc.m_sid_fnanddate+" fn:'"+_doc.m_sAbsFileName+"'  dir2idx:" +this->m_sDir2Index);
+            }
+        }
+    }*/
 
-    pReader->close();
-    _CLDELETE(pReader);
-    //do I need this?
-    //_CL_LDECREF(m_pLucyIndexer->getDirectory()); //derefence since we are on the stack...
-
-    m_pLogger->wrn("delDeletedFilesFromIdx end (deleteds: "+QString::number(iDeletedDocs)+") "+this->m_sDir2Index);
-    return iDeletedDocs;
+    m_pLogger->wrn("delDeletedFilesFromIdx end (deleteds: "+QString::number(docs2BeDeleted.size())+") "+this->m_sDir2Index);
+    return docs2BeDeleted.size();
 }
 void indexerWorker::fillIdxInfo(IdxInfo* idxi)
 {
