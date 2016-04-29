@@ -1,10 +1,12 @@
 #include "indexerworker.h"
 #include "indexerthread.h"
 #include "str.h"
+#include "f.h"
 #include <QTime>
 #include <QThread>
 #include <QDebug>
 #include <QDirIterator>
+#include "CLucene/document/FieldSelector.h"
 
 indexerWorker::indexerWorker(QString sDir2Index, logger* pLogger, jvm* pJvm/*, lucyindexer* pLucyIndexer*/, QObject *parent) : QObject(parent),
     m_pLogger(pLogger), m_pJvm(pJvm), m_sDir2Index(sDir2Index), m_iIndexedFiles(0), m_iIndexingTime(0), m_iFoundFiles(0), m_pLucyIndexer(nullptr)
@@ -36,10 +38,11 @@ void indexerWorker::doWork()
         {   //opt
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             if (this->m_pLucyIndexer)this->m_pLucyIndexer->onIndexerThreadFinished(true);
+            CleanUp();
         }
         {   //del
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
-            iDeletedFiles = delDeletedFiles();
+            iDeletedFiles = delDeletedFilesFromIdx();
         }
         if(iDeletedFiles > 999)
         {   //opt again
@@ -50,7 +53,11 @@ void indexerWorker::doWork()
         m_iIndexingTime = t.elapsed();
         m_pLogger->inf("an indexer thread finished. found#:"+QString::number(getNrOfFoundFiles())+" indexed#:"+QString::number(getNrOfIndexedFiles())+" NrOfFilesInIdx:"+QString::number(getNrOfFilesInIndex())+" deleteds:"+QString::number(iDeletedFiles)+" time:"+logger::t_elapsed(getIndexTime())+"  dir:"+getIndexedDir()+" loop:"+QString::number(iLoop));
 
-        for(int i=0;i<3333;i++)
+        int iWait = 3333;
+#ifdef _DEBUG
+        iWait = 33;
+#endif
+        for(int i=0;i<iWait;i++)
         {
             if(QThread::currentThread()->isInterruptionRequested()) { finishIndexing(true); return; }
             QThread::msleep(99/*milliseconds*/);
@@ -60,6 +67,16 @@ void indexerWorker::doWork()
     }
 
     emit finished();
+}
+
+void indexerWorker::CleanUp()
+{
+    //apache-tika-168018021069888116.tmp
+    int iDeleteds=0;
+    int iDeletionFailed=0;
+    QString sPattern("apache-tika-*.tmp");
+    f::emptydir(QDir::tempPath(), sPattern, false, iDeleteds, iDeletionFailed);
+    m_pLogger->inf("cleanup "+QDir::tempPath()+"/"+sPattern+" del:"+QString::number(iDeleteds)+" delFailed:"+QString::number(iDeletionFailed));
 }
 
 void indexerWorker::dir(QString sDir, int iLoop)
@@ -263,21 +280,29 @@ void indexerWorker::finishIndexing(bool bInterruptionRequested)
     }
 }
 
-int indexerWorker::delDeletedFiles()
+int indexerWorker::delDeletedFilesFromIdx()
 {
-    m_pLogger->wrn("delDeletedFiles start "+this->m_sDir2Index);
+    m_pLogger->wrn("delDeletedFilesFromIdx start "+this->m_sDir2Index);
     int iDeletedDocs = 0;
-    //QMutexLocker ml(lucy::getIndexerLock());  //not needed
+    int32_t maxDoc = m_pLucyIndexer->getIndexer()->docCount();
 
-    IndexModifier* pIndexer = m_pLucyIndexer->getIndexer();
-    int32_t maxDoc = pIndexer->docCount();
+    MapFieldSelector fieldsToLoad;
+    fieldsToLoad.add(FIELDNAME_ABSPATHNAME, FieldSelector::LOAD);
+    IndexReader* pReader = IndexReader::open(m_pLucyIndexer->getDirectory());
+
     for(int i=maxDoc-1; i>-1; i--)
     {
         if(QThread::currentThread()->isInterruptionRequested()) { break; }
+        if(pReader->isDeleted(i))continue;
         Document doc;
-        if(!pIndexer->document(i, doc))
+        if(!pReader->document(i, doc, &fieldsToLoad))
         {
             m_pLogger->wrn("!doc for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
+            continue;
+        }
+        if(doc.getFields()->size() != 1)
+        {
+            m_pLogger->wrn("!doc.fields("+QString::number(doc.getFields()->size())+") for nr:"+QString::number(i)+"/"+QString::number(maxDoc));
             continue;
         }
         {
@@ -292,13 +317,18 @@ int indexerWorker::delDeletedFiles()
             if( !bExists)
             {
                 if(QThread::currentThread()->isInterruptionRequested()) { break; }
-                pIndexer->deleteDocument(i);
+                m_pLucyIndexer->getIndexer()->deleteDocument(i);
                 iDeletedDocs++;
             }
         }
     }
 
-    m_pLogger->wrn("delDeletedFiles end (deleteds: "+QString::number(iDeletedDocs)+") "+this->m_sDir2Index);
+    pReader->close();
+    _CLDELETE(pReader);
+    //do I need this?
+    //_CL_LDECREF(m_pLucyIndexer->getDirectory()); //derefence since we are on the stack...
+
+    m_pLogger->wrn("delDeletedFilesFromIdx end (deleteds: "+QString::number(iDeletedDocs)+") "+this->m_sDir2Index);
     return iDeletedDocs;
 }
 void indexerWorker::fillIdxInfo(IdxInfo* idxi)

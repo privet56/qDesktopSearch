@@ -18,6 +18,8 @@ public:
     static bool emptydir(QString sDir, logger* pLog);
     static QString fileSizeAsString(qint64 size);
 
+    static void emptydir(QString sDir, QString sPattern, bool bRecursive, int& iDeleteds, int& iDeletionFaileds);
+
 signals:
 
 public slots:

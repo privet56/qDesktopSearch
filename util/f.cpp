@@ -1,6 +1,9 @@
 #include "f.h"
+#include "str.h"
 #include <QDir>
 #include <QChar>
+#include <QFileInfo>
+#include <QStringList>
 
 f::f(QObject *parent) : QObject(parent)
 {
@@ -55,4 +58,38 @@ QString f::fileSizeAsString(qint64 size)
     }
 
     return QString(QLatin1String("%1 %2")).arg(newSize, 0, 'f', 1).arg(unit);
+}
+
+void f::emptydir(QString sDir, QString sPattern, bool bRecursive, int& iDeleteds, int& iDeletionFaileds)
+{
+    QDir d(sDir);
+    d.setFilter(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    QStringList filters;
+    filters << sPattern.split(' ');
+    d.setNameFilters(filters);
+    QStringList fs = d.entryList();
+
+    for(int i=0; i < fs.length(); i++)
+    {
+        QString sFN(str::makeAbsFN(sDir,fs.at(i)));
+        QFileInfo f(sFN);
+        if(f.isDir())
+        {
+            if(bRecursive)
+            {
+                emptydir(sFN, sPattern, bRecursive, iDeleteds, iDeletionFaileds);
+            }
+        }
+        else if(f.isFile())
+        {
+            if(!QFile::remove(sFN))
+                iDeletionFaileds++;
+            else
+                iDeleteds++;
+        }
+        else
+        {
+            //should not happen on win
+        }
+    }
 }

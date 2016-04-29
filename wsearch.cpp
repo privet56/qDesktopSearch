@@ -22,6 +22,8 @@ wSearch::wSearch(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    //TODO: clear button
+
     {
         wsearchresultModel* pWsearchresultModel = new wsearchresultModel(m_pSearcher, this->ui->tableView);
         this->ui->tableView->setModel(pWsearchresultModel);

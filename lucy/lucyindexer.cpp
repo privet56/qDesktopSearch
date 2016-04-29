@@ -1,6 +1,7 @@
 #include "lucyindexer.h"
 
 #define DO_FAST_MORE_THAN_SAFE
+//#define DO_LIGHTWEIGHT_OPTIMIZATION
 
 lucyindexer::lucyindexer(logger* pLogger, QObject *parent) : lucy(pLogger, parent), m_pIndexWriter(nullptr), m_iIndexedFiles(0), m_bNewIndex(false)
 {
@@ -83,6 +84,7 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
         {
             this->m_pLogger->wrn("too much files in NEW idx deleted(iDeletedFiles:"+QString::number(iDeletedFiles)+", id_fn:{"+id_fn+"}) fn:{"+sAbsPathName+"}");
         }
+        //if(iDeletedFiles > 0)m_pIndexWriter->flush();
     }
 
     Document doc;
@@ -123,11 +125,15 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
 
 void lucyindexer::onIndexerThreadFinished(bool bIndexerLoopFinished/*=false*/)
 {
-    if(m_pIndexWriter &&
+
+    if(m_pIndexWriter
+#ifndef DO_LIGHTWEIGHT_OPTIMIZATION
+       &&
        (
         ( m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES) ||
         ((m_iIndexedFiles > OPTIMIZE_AFTER_INDEXED_FILES/1000) && bIndexerLoopFinished)
        )
+#endif
       )
     {
         //TODO: how to make it better (currently the UI is blocked while optimizing)? ipc?
@@ -136,14 +142,16 @@ void lucyindexer::onIndexerThreadFinished(bool bIndexerLoopFinished/*=false*/)
         QTime t;
         t.start();
         m_pIndexWriter->flush();
-        m_pIndexWriter->optimize();
+#ifndef DO_LIGHTWEIGHT_OPTIMIZATION
+        m_pIndexWriter->optimize();       //TODO: check if this call causes crash later when trying to write the index again.!? //maybe it would now work, after delDeletedFiles is fixed...
+#endif
         if(t.elapsed() > 999)
         {
             this->m_pLogger->inf("optimized in "+logger::t_elapsed(t.elapsed())+" "+this->m_sDir2Index);
         }
         else
         {
-            m_pLogger->wrn("opt END.. (new:"+QString::number(m_bNewIndex)+", IdxLoopFinish:"+QString::number(bIndexerLoopFinished)+") "+this->m_sDir2Index);
+            m_pLogger->wrn("opt END... (new:"+QString::number(m_bNewIndex)+", IdxLoopFinish:"+QString::number(bIndexerLoopFinished)+") "+this->m_sDir2Index);
         }
     }
     if(bIndexerLoopFinished)
