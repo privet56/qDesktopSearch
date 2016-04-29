@@ -321,6 +321,15 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
             extractMetaContents(oMetadata, cMetadata, element, pMetas, sMetaName);
             m_pEnv->DeleteLocalRef(element);
         }
+        {   //call close on oFileInputStream
+            jclass cFileInputStream = getClass("java.io.FileInputStream");
+            jmethodID close = m_pEnv->GetMethodID(cFileInputStream, "close", "()V");
+            if(!close)
+            {
+                this->m_pLogger->err("cannot load close{()V}");
+            }
+            m_pEnv->CallVoidMethod(oFileInputStream, close);
+        }
 
         m_pEnv->DeleteLocalRef(array);
 //cleanup before return

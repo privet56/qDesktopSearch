@@ -333,8 +333,10 @@ int indexerWorker::delDeletedFilesFromIdx()
                 }
             }
         }
-
-        pReader->commit();  //without this line, the deletion won't be executed really
+        if(docs2BeDeleted.size() > 0)
+        {
+            pReader->commit();  //without this line, the deletion won't be executed really
+        }
         pReader->close();
         _CLLDELETE(pReader);
     }
