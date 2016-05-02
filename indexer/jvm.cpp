@@ -389,14 +389,13 @@ QString jvm::js2qs(jstring js)
 
 QString jvm::getMemSetting4Jvm()
 {
-    QString sXMXDefault("2048");
     QString sXMXCfg(this->m_pLogger->GetCfg()->getValue("xmx"));
     if(!str::isempty(sXMXCfg))
     {
         return sXMXCfg;
     }
 
-    int iRAMinMB = 1024;
+    int iTotalRAMinMB = 10240;//default: 10 GB
 
     //TODO: test non-windows code
 
@@ -406,13 +405,13 @@ QString jvm::getMemSetting4Jvm()
     memory_status.dwLength = sizeof(MEMORYSTATUSEX);
     if (GlobalMemoryStatusEx(&memory_status))
     {
-        iRAMinMB = memory_status.ullTotalPhys / (1024 * 1024);
+        iTotalRAMinMB = memory_status.ullTotalPhys / (1024 * 1024);
     }
 #elif Q_OS_UNIX
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGE_SIZE);
     long ram = pages * page_size;
-    iRAMinMB = ram / (1024 * 1024);
+    iTotalRAMinMB = ram / (1024 * 1024);
 #elif Q_OS_MAC
     int mib[2] = { CTL_HW, HW_MEMSIZE };
     u_int namelen = sizeof(mib) / sizeof(mib[0]);
@@ -425,16 +424,22 @@ QString jvm::getMemSetting4Jvm()
     }
     else
     {
-        iRAMinMB = size / (1024 * 1024);    //printf("HW.HW_MEMSIZE = %llu bytes\n", size);
+        iTotalRAMinMB = size / (1024 * 1024);    //printf("HW.HW_MEMSIZE = %llu bytes\n", size);
     }
 #endif
+
+    if (iTotalRAMinMB < 1024)
+        iTotalRAMinMB = 1024;
+
+    int iRAMinMB = iTotalRAMinMB / 10;  //I would like to have 1/10 of your available memory for the jvm
 
     if (iRAMinMB < 512)
         iRAMinMB = 512;
     if (iRAMinMB > 2048)
         iRAMinMB = 2048;
 
-    return QString::number(iRAMinMB);
+    QString sXMX = QString::number(iRAMinMB);
+    return sXMX;
 }
 
 jvm::~jvm()
