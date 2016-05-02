@@ -24,6 +24,7 @@ protected:
     jobject getObject(QString sClassAbsName, QString sStringConstructorParameter);
     jobject getObject(QString sClassAbsName, jobject constrParam, QString sConstrParamClassName, bool bErrIfCannotInit=true);
     void extractMetaContents(jobject oMetadata, jclass cMetadata, jstring metaName, QMap<QString, QStringList>* pMetas, QString sMetaName);
+    QString getMemSetting4Jvm();
 
 protected:
     logger* m_pLogger;

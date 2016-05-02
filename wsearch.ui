@@ -311,6 +311,29 @@
        </widget>
       </item>
       <item>
+       <widget class="QCommandLinkButton" name="commandLinkButtonClear">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>99</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Clear</string>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/edit-clear.png</normaloff>:/res/edit-clear.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="lHitCount">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">

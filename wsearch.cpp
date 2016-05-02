@@ -33,6 +33,8 @@ wSearch::wSearch(QWidget *parent) :
     on_eSearchTerm_textChanged("");
 
     this->ui->cbField->setModel(new wFieldsModel(this->m_pLog, this->m_pSearcher));
+
+    this->ui->tableView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder);  //initial state: no sort indicator(-1)
 }
 
 wSearch::~wSearch()
@@ -48,6 +50,14 @@ void wSearch::on_eSearchTerm_textChanged(const QString &arg1)
 
 void wSearch::on_commandLinkButtonSearch_clicked()
 {
+    if(str::isempty(this->ui->eSearchTerm->text(), true))
+    {
+        this->m_pLog->inf("nothing to search for...");
+        return;
+    }
+
+    this->ui->tableView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder);  //initial state: no sort indicator(-1)  //sort by score
+
     QTime t;
     t.start();
     QPair<QString, QString> pair;
@@ -107,14 +117,7 @@ void wSearch::OnCfgChanged(QString sCfgEntryName, QString sCfgEntryValue)
 
     wsearchresultModel* pModel = (wsearchresultModel*)this->ui->tableView->model();
     pModel->reset();
-    wsearchresultModel* pModel2 = new wsearchresultModel(nullptr, nullptr);
-    //TODO: do it better (emit dataChanged?)
-    this->ui->tableView->setModel(pModel2);
-    this->ui->tableView->setModel(pModel);
-    delete pModel2;
-    pModel2 = nullptr;
     this->ui->lHitCount->setText("-");
-
     this->m_pLog->inf("result list resetted because of indexer changes");
 }
 
@@ -192,4 +195,17 @@ void wSearch::on_actionOpen()
     {
         if(this->m_pLog)this->m_pLog->wrn("failed to execute '"+sAbsFN+"'");
     }
+}
+
+void wSearch::on_commandLinkButtonClear_clicked()
+{
+    wsearchresultModel* pModel = (wsearchresultModel*)this->ui->tableView->model();
+    pModel->reset();
+    this->ui->tableView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder);  //initial state: no sort indicator(-1)
+    this->ui->lHitCount->setText("-");
+}
+
+void wSearch::on_eSearchTerm_returnPressed()
+{
+    on_commandLinkButtonSearch_clicked();
 }

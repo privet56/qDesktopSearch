@@ -34,6 +34,10 @@ private slots:
     void on_actionInfo();
     void on_actionOpen();
 
+    void on_commandLinkButtonClear_clicked();
+
+    void on_eSearchTerm_returnPressed();
+
 private:
     Ui::wSearch *ui;
 };

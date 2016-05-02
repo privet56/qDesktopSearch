@@ -202,7 +202,10 @@ QModelIndex wsearchresultModel::buddy(const QModelIndex &index) const
 void wsearchresultModel::reset()
 {
     if (this->m_pSearcher)
+    {
         this->m_pSearcher->cleanup(false);
+        emit layoutChanged();
+    }
 }
 
 searcher* wsearchresultModel::getSearcher()

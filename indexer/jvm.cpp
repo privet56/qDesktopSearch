@@ -4,6 +4,17 @@
 #include <QThread>
 #include "str.h"
 
+#ifdef Q_OS_WIN
+    #include <windows.h>
+#elif Q_OS_UNIX
+    #include <unistd.h>
+#elif Q_OS_MAC
+    #include <stdio.h>
+    #include <stdint.h>
+    #include <sys/types.h>
+    #include <sys/sysctl.h>
+#endif
+
 typedef jint (JNICALL* JNI_CreateJavaVM2) (JavaVM **pvm, void **penv, void *args);
 
 #define OPTIONSLEN 4
@@ -29,11 +40,18 @@ bool jvm::load()
 
     QString sJavaClassPath("-Djava.class.path="+sTika);
     QByteArray ba = sJavaClassPath.toLocal8Bit();
-    char* pJavaClassPath = (char*)strdup(ba.constData());       //TODO: cleanup
+    char* pJavaClassPath = (char*)strdup(ba.constData());
     options[0].optionString = (char*)pJavaClassPath;
     options[1].optionString = (char*)"-Dworkdir=.";
-    options[2].optionString = (char*)"-Xms2048m";               //TODO: make it dynamic
-    options[3].optionString = (char*)"-Xmx2048m";
+    QString sXMX = getMemSetting4Jvm();
+    QString sXmx("-Xmx"+sXMX+"m");
+    QString sXms("-Xms"+sXMX+"m");
+    ba = sXmx.toLocal8Bit();
+    char* pXmx = (char*)strdup(ba.constData());
+    ba = sXms.toLocal8Bit();
+    char* pXms = (char*)strdup(ba.constData());
+    options[2].optionString = (char*)pXms;
+    options[3].optionString = (char*)pXmx;
 
     QString sJvmDll(qApp->applicationDirPath() + "/jre/bin/server/jvm.dll");    //TODO: .so for !win
     if(!QFile::exists(sJvmDll))
@@ -57,6 +75,13 @@ bool jvm::load()
         return this->m_pLogger->err("cannot load jvm("+sJvmDll+")");
 
     this->m_pLogger->inf("pJavaClassPath:"+QString(pJavaClassPath));
+
+    {
+        free(pJavaClassPath);pJavaClassPath = nullptr;
+        free(pXms);pXms = nullptr;
+        free(pXmx);pXmx = nullptr;
+    }
+
     if(!getClass("java.io.File") ||
        !getClass("org.apache.tika.parser.AutoDetectParser") ||
        !getClass("org.apache.tika.sax.BodyContentHandler") ||
@@ -253,7 +278,7 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
 
 #ifdef _DEBUG
     QStringList sl;
-    sl << QString("fulltext dummy text").repeated(99);
+    sl << QString("fulltext dummy text "+sAbsPathName).repeated(99);
     pMetas->operator []("text") = sl;
     return;
 #endif
@@ -360,6 +385,56 @@ QString jvm::js2qs(jstring js)
     args = nullptr;
     return s;
     */
+}
+
+QString jvm::getMemSetting4Jvm()
+{
+    QString sXMXDefault("2048");
+    QString sXMXCfg(this->m_pLogger->GetCfg()->getValue("xmx"));
+    if(!str::isempty(sXMXCfg))
+    {
+        return sXMXCfg;
+    }
+
+    int iRAMinMB = 1024;
+
+    //TODO: test non-windows code
+
+#ifdef Q_OS_WIN
+    MEMORYSTATUSEX memory_status;
+    ZeroMemory(&memory_status, sizeof(MEMORYSTATUSEX));
+    memory_status.dwLength = sizeof(MEMORYSTATUSEX);
+    if (GlobalMemoryStatusEx(&memory_status))
+    {
+        iRAMinMB = memory_status.ullTotalPhys / (1024 * 1024);
+    }
+#elif Q_OS_UNIX
+    long pages = sysconf(_SC_PHYS_PAGES);
+    long page_size = sysconf(_SC_PAGE_SIZE);
+    long ram = pages * page_size;
+    iRAMinMB = ram / (1024 * 1024);
+#elif Q_OS_MAC
+    int mib[2] = { CTL_HW, HW_MEMSIZE };
+    u_int namelen = sizeof(mib) / sizeof(mib[0]);
+    uint64_t size;
+    size_t len = sizeof(size);
+
+    if (sysctl(mib, namelen, &size, &len, NULL, 0) < 0)
+    {
+        //perror("sysctl");
+    }
+    else
+    {
+        iRAMinMB = size / (1024 * 1024);    //printf("HW.HW_MEMSIZE = %llu bytes\n", size);
+    }
+#endif
+
+    if (iRAMinMB < 512)
+        iRAMinMB = 512;
+    if (iRAMinMB > 2048)
+        iRAMinMB = 2048;
+
+    return QString::number(iRAMinMB);
 }
 
 jvm::~jvm()
