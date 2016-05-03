@@ -35,5 +35,6 @@
 		<file>res/bunny_hopps.gif</file>
 		<file>res/bunny_hopps2.gif</file>
 		<file>res/edit-clear.png</file>
+		<file>res/delete2.png</file>
     </qresource>
 </RCC>

@@ -21,11 +21,18 @@ void lucysearcher::open(Directory* pDirectory)
     m_pIndexSearcher = new lucene::search::IndexSearcher(pDirectory);
 }
 
-void lucysearcher::open(QString sDir2Index)
+void lucysearcher::open(QString sDir2Index, IndexReader* pReader)
 {
     lucy::open(sDir2Index);
 
-    open(this->m_pDirectory);
+    if(pReader == nullptr)
+    {
+        open(this->m_pDirectory);
+    }
+    else
+    {
+        m_pIndexSearcher = new lucene::search::IndexSearcher(pReader);
+    }
 }
 
 IndexSearcher* lucysearcher::getSearcher()

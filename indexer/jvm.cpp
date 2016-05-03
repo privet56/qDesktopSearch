@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QThread>
 #include "str.h"
+#include "f.h"
 
 #ifdef Q_OS_WIN
     #include <windows.h>
@@ -278,7 +279,10 @@ void jvm::getMetaContents(QString sAbsPathName, QMap<QString, QStringList>* pMet
 
 #ifdef _DEBUG
     QStringList sl;
-    sl << QString("fulltext dummy text "+sAbsPathName).repeated(99);
+    QString sTxt = sAbsPathName;
+    //if (sTxt.toLower().endsWith(".txt"))
+    sTxt += " " + f::getFC(sAbsPathName);
+    sl << QString(sTxt);
     pMetas->operator []("text") = sl;
     return;
 #endif

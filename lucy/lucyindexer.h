@@ -10,6 +10,7 @@
 #include <QFileInfo>
 #include "lucy.h"
 #include "idxinfo.h"
+#include "qindexmodifier.h"
 
 class lucyindexer : public lucy
 {
@@ -25,13 +26,14 @@ public:
     void index(QString sAbsPathName, QMap<QString, QStringList>* pMetaContents, QFileInfo finfo);
     void onIndexerThreadFinished(bool bIndexerLoopFinished=false);
     QString getIdFNandDATE(QString sAbsPathName, QFileInfo finfo);
-    IndexModifier* getIndexer();
+    QIndexModifier* getIndexer();
 
     QString metaName(QString sRawMetaName);
     QString getIndexDir();
+    int32_t delDoc(QString sFieldName, QString sFieldContent);
 
 protected:
-    IndexModifier* m_pIndexWriter;      //the alternative would be IndexWriter*
+    QIndexModifier* m_pIndexWriter;      //the alternative would be IndexWriter*
     int m_iIndexedFiles;
     bool m_bNewIndex;
 

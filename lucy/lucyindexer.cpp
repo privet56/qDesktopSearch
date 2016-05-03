@@ -1,4 +1,5 @@
 #include "lucyindexer.h"
+#include "qindexmodifier.h"
 
 #define DO_FAST_MORE_THAN_SAFE
 #define DO_LIGHTWEIGHT_OPTIMIZATION
@@ -18,7 +19,7 @@ void lucyindexer::open(QString sDir2Index)
 
     //http://clucene.sourceforge.net/doc/html/classlucene_1_1index_1_1IndexModifier.html#_details
     //  Note that you cannot create more than one IndexModifier object on the same directory at the same time
-    m_pIndexWriter  = new IndexModifier(m_pDirectory, m_pAnalyzer, bReCreate/*recreate*/);
+    m_pIndexWriter  = new QIndexModifier(m_pDirectory, m_pAnalyzer, bReCreate/*recreate*/);
     m_pIndexWriter->setMaxFieldLength(INT_MAX);
 
     if(!m_bNewIndex)
@@ -61,7 +62,17 @@ bool lucyindexer::isIndexed(QString sAbsPathName, QFileInfo finfo)
     _CLDECDELETE(term);
     return bDocIsAlreadyIndexed;
 }
-
+int lucyindexer::delDoc(QString sFieldName, QString sFieldContent)
+{
+    Term* term = _CLNEW Term(sFieldName.toStdWString().c_str(), sFieldContent.toStdWString().c_str());
+    int32_t iDeletedFiles = m_pIndexWriter->deleteDocuments(term);
+    _CLDECDELETE(term);
+    if(iDeletedFiles > 0)
+    {
+        m_pIndexWriter->flush();
+    }
+    return iDeletedFiles;
+}
 void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaContents, QFileInfo finfo)
 {
     sAbsPathName = str::normalizePath(sAbsPathName, false);
@@ -71,11 +82,9 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
     if(!this->m_bNewIndex)      //if(oldIndex)  -> check for old doc version and del before indexing it in the new version
 #endif
     {   //delete old version, if there
-        //TODO: don't delete in NEW index
+        //TODO: better to delete with new Reader???
         //TODO: is qHash enough to identify a record?
-        Term* term = _CLNEW Term(ID_FN, id_fn.toStdWString().c_str());
-        int32_t iDeletedFiles = m_pIndexWriter->deleteDocuments(term);
-        _CLDECDELETE(term);
+        int32_t iDeletedFiles = this->delDoc(QString::fromStdWString(ID_FN), id_fn);
         if(iDeletedFiles > 1)
         {
             this->m_pLogger->wrn("too much files deleted(iDeletedFiles:"+QString::number(iDeletedFiles)+", id_fn:{"+id_fn+"}) fn:{"+sAbsPathName+"}");
@@ -84,7 +93,12 @@ void lucyindexer::index(QString sAbsPathName, QMap<QString, QStringList>* pMetaC
         {
             this->m_pLogger->wrn("too much files in NEW idx deleted(iDeletedFiles:"+QString::number(iDeletedFiles)+", id_fn:{"+id_fn+"}) fn:{"+sAbsPathName+"}");
         }
-        //if(iDeletedFiles > 0)m_pIndexWriter->flush();
+        else
+        {
+#ifdef _DEBUG
+            this->m_pLogger->inf("deleted.old.version id_fn:"+id_fn);
+#endif
+        }
     }
 
     Document doc;
@@ -138,7 +152,9 @@ void lucyindexer::onIndexerThreadFinished(bool bIndexerLoopFinished/*=false*/)
     {
         //TODO: how to make it better (currently the UI is blocked while optimizing)? ipc?
         QMutexLocker ml(lucy::getIndexerLock());
+#ifdef _DEBUG
         m_pLogger->wrn("opt START (new:"+QString::number(m_bNewIndex)+", IdxLoopFinish:"+QString::number(bIndexerLoopFinished)+") "+this->m_sDir2Index);
+#endif
         QTime t;
         t.start();
         m_pIndexWriter->flush();
@@ -151,7 +167,9 @@ void lucyindexer::onIndexerThreadFinished(bool bIndexerLoopFinished/*=false*/)
         }
         else
         {
-            m_pLogger->wrn("opt END... (new:"+QString::number(m_bNewIndex)+", IdxLoopFinish:"+QString::number(bIndexerLoopFinished)+") "+this->m_sDir2Index);
+#ifdef _DEBUG
+            m_pLogger->inf("opt END... (new:"+QString::number(m_bNewIndex)+", IdxLoopFinish:"+QString::number(bIndexerLoopFinished)+") "+this->m_sDir2Index);
+#endif
         }
     }
     if(bIndexerLoopFinished)
@@ -188,7 +206,7 @@ QString lucyindexer::getIdFNandDATE(QString sAbsPathName, QFileInfo finfo)
     return QString::number(qHash(sAbsPathName)) + "_" + QString::number(finfo.lastModified().toTime_t());
 }
 
-IndexModifier* lucyindexer::getIndexer()
+QIndexModifier* lucyindexer::getIndexer()
 {
     return this->m_pIndexWriter;
 }

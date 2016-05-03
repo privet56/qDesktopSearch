@@ -9,7 +9,7 @@ class lucysearcher : public lucy
 public:
     lucysearcher(logger* pLogger, QObject *parent = 0);
     ~lucysearcher();
-    void open(QString sDir2Index);
+    void open(QString sDir2Index, IndexReader* pReader);
     void open(Directory* pDirectory);
     IndexSearcher* getSearcher();
     void setSearcher(IndexSearcher* pSearcher);

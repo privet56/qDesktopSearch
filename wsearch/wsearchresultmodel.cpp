@@ -111,13 +111,24 @@ QVariant wsearchresultModel::data(const QModelIndex &index, int role) const
     {
 		return QVariant();
     }
+    else if (role == Qt::TextColorRole)
+    {
+
+    }
     else if (role == Qt::ForegroundRole)
     {
-		return QVariant();	//return QBrush("fontColor");
+
     }
     else if (role == Qt::BackgroundRole)
     {
-		return QVariant();	//return QBrush("fontColor");
+        //if(column2BeReturned == COL_FILENAME)
+        {
+            QString sAbsFN = m_pSearcher->GetHitAttr(hitIndex2BeReturned, QString::fromStdWString(FIELDNAME_ABSPATHNAME));
+            if(!QFile::exists(sAbsFN))
+            {
+                return QVariant::fromValue(QColor(Qt::lightGray));
+            }
+        }
     }
 
     return QVariant();
@@ -131,9 +142,17 @@ QVariant wsearchresultModel::headerData(int section, Qt::Orientation orientation
         {
             if(m_pSearcher)
             {
-                QFileInfo fi(m_pSearcher->GetHitAttr(section, QString::fromStdWString(FIELDNAME_ABSPATHNAME)));
-                static QFileIconProvider fip;
-                return fip.icon(fi);
+                QString sAbsFN(m_pSearcher->GetHitAttr(section, QString::fromStdWString(FIELDNAME_ABSPATHNAME)));
+                if(!QFile::exists(sAbsFN))
+                {
+                    return QIcon(":/res/delete2.png");
+                }
+                else
+                {
+                    QFileInfo fi(sAbsFN);
+                    static QFileIconProvider fip;
+                    return fip.icon(fi);
+                }
             }
             return QIcon(":/res/hit.png");
         }

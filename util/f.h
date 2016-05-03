@@ -19,6 +19,7 @@ public:
     static QString fileSizeAsString(qint64 size);
 
     static void emptydir(QString sDir, QString sPattern, bool bRecursive, int& iDeleteds, int& iDeletionFaileds);
+    static QString getFC(QString sAbsFN, logger* pLog = nullptr);
 
 signals:
 

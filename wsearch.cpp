@@ -44,7 +44,7 @@ wSearch::~wSearch()
 
 void wSearch::on_eSearchTerm_textChanged(const QString &arg1)
 {
-    this->ui->commandLinkButtonSearch->setEnabled(!str::isempty(arg1));
+    this->ui->commandLinkButtonSearch->setEnabled(!str::isempty(arg1) && !str::isempty(this->ui->cbField->currentText()));
     //TODO: autocomplete!?
 }
 
@@ -133,6 +133,10 @@ void wSearch::fillFields()
         QString sCurrentText = this->ui->cbField->currentText();
         ((wFieldsModel*)this->ui->cbField->model())->setFields(list);
         this->ui->cbField->setCurrentText((!str::isempty(sCurrentText) && list.contains(sCurrentText)) ? sCurrentText : "text");
+        if(str::isempty(sCurrentText, true))
+        {
+            on_eSearchTerm_textChanged(this->ui->eSearchTerm->text());
+        }
     }
 
     QTimer::singleShot(4999 * 10/*msec = 5*10 secs*/, this, SLOT(fillFields()));

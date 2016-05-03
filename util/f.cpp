@@ -93,3 +93,26 @@ void f::emptydir(QString sDir, QString sPattern, bool bRecursive, int& iDeleteds
         }
     }
 }
+
+QString f::getFC(QString sAbsFN, logger* pLog/*=nullptr*/)
+{
+    QFile f(sAbsFN);
+    if(!f.exists())
+    {
+        if(pLog)pLog->wrn("GetFC fnf:"+sAbsFN);
+        return "";
+    }
+    if(!f.open(QFile::ReadOnly))
+    {
+        if(pLog)pLog->wrn("GetFC !open:"+sAbsFN);
+        return "";
+    }
+    QByteArray buff = f.readAll();
+    f.close();
+    QString sFC(buff);
+    if(str::isempty(sFC, false))
+    {
+        if(pLog)pLog->wrn("GetFC isEmpty:"+sAbsFN);
+    }
+    return sFC;
+}

@@ -58,7 +58,9 @@ int searcher::search(QList<QPair<QString, QString>> lpSearchinputs)
         lucysearcher* pLucySearcher = new lucysearcher(this->m_pLog);
 
         QString sDir2Index(i.key());
-        pLucySearcher->open(sDir2Index);    //crash at the second search
+        IndexReader* pReader = nullptr;//i.value()->getWorker()->getIndexer()->getIndexer()->getIndexReader();
+
+        pLucySearcher->open(sDir2Index, pReader);    //crash at the second search?
 
         m_searchables[iIdx] = pLucySearcher->getSearcher();
         m_lucysearchables.append(pLucySearcher);
@@ -148,6 +150,7 @@ QString searcher::GetHitAttr(int iHitNr, QString sAttrName)
 
     Document* d = &(m_hits->doc(iHitNr));
     if(!d)return "";
+
     const TCHAR* pAttrValue = d->get(sAttrName.toStdWString().c_str());
 
     if(!pAttrValue)

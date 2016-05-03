@@ -60,7 +60,8 @@ SOURCES += main.cpp \
     lucy/QTokenizer.cpp \
     lucy/QSimpleAnalyzer.cpp \
     lucy/QStandardAnalyzer.cpp \
-    lucy/QStandardTokenizer.cpp
+    lucy/QStandardTokenizer.cpp \
+    lucy/qindexmodifier.cpp
 
 HEADERS  += mainwindow.h \
     wsearch.h \
@@ -93,7 +94,8 @@ HEADERS  += mainwindow.h \
     lucy/QTokenizer.h \
     lucy/QSimpleAnalyzer.h \
     lucy/QStandardAnalyzer.h \
-    lucy/QStandardTokenizer.h
+    lucy/QStandardTokenizer.h \
+    lucy/qindexmodifier.h
 
 FORMS    += mainwindow.ui \
     wsearch.ui \
